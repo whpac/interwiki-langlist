@@ -508,24 +508,26 @@ $(function () {
         }
         finally { if (e_4) throw e_4.error; }
     }
-    // Służy do ukrywania selektora języków
-    document.addEventListener('mousemove', function (ev) {
-        var selector_rect = langlist.GetBoundingClientRect();
-        var is_out_X = ev.clientX < selector_rect.left || ev.clientX > selector_rect.right;
-        var is_out_Y = ev.clientY < selector_rect.top || ev.clientY > selector_rect.bottom;
-        if (is_out_X || is_out_Y)
-            langlist.Hide();
-    });
-    // Jeśli za blisko jednej z krawędzi, przesuń się
-    var scrolling = false;
-    window.addEventListener('scroll', function () {
-        // Ogranicza częstotliwość przeliczania położenia
-        if (!scrolling) {
-            window.requestAnimationFrame(function () {
-                langlist.RepositionSelf();
-                scrolling = false;
-            });
-        }
-        scrolling = true;
-    });
+    if (wd_links.length > 0) {
+        // Służy do ukrywania selektora języków
+        document.addEventListener('mousemove', function (ev) {
+            var selector_rect = langlist.GetBoundingClientRect();
+            var is_out_X = ev.clientX < selector_rect.left || ev.clientX > selector_rect.right;
+            var is_out_Y = ev.clientY < selector_rect.top || ev.clientY > selector_rect.bottom;
+            if (is_out_X || is_out_Y)
+                langlist.Hide();
+        });
+        // Jeśli za blisko jednej z krawędzi, przesuń się
+        var scrolling_1 = false;
+        window.addEventListener('scroll', function () {
+            // Ogranicza częstotliwość przeliczania położenia
+            if (!scrolling_1) {
+                window.requestAnimationFrame(function () {
+                    langlist.RepositionSelf();
+                    scrolling_1 = false;
+                });
+            }
+            scrolling_1 = true;
+        });
+    }
 });

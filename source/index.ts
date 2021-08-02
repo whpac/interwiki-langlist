@@ -32,27 +32,29 @@ $(() => {
         });
     }
 
-    // Służy do ukrywania selektora języków
-    document.addEventListener('mousemove', (ev) => {
-        let selector_rect = langlist.GetBoundingClientRect();
+    if(wd_links.length > 0) {
+        // Służy do ukrywania selektora języków
+        document.addEventListener('mousemove', (ev) => {
+            let selector_rect = langlist.GetBoundingClientRect();
 
-        let is_out_X = ev.clientX < selector_rect.left || ev.clientX > selector_rect.right;
-        let is_out_Y = ev.clientY < selector_rect.top || ev.clientY > selector_rect.bottom;
+            let is_out_X = ev.clientX < selector_rect.left || ev.clientX > selector_rect.right;
+            let is_out_Y = ev.clientY < selector_rect.top || ev.clientY > selector_rect.bottom;
 
-        if(is_out_X || is_out_Y) langlist.Hide();
-    });
+            if(is_out_X || is_out_Y) langlist.Hide();
+        });
 
-    // Jeśli za blisko jednej z krawędzi, przesuń się
-    let scrolling = false;
-    window.addEventListener('scroll', () => {
-        // Ogranicza częstotliwość przeliczania położenia
-        if(!scrolling) {
-            window.requestAnimationFrame(() => {
-                langlist.RepositionSelf();
-                scrolling = false;
-            });
-        }
+        // Jeśli za blisko jednej z krawędzi, przesuń się
+        let scrolling = false;
+        window.addEventListener('scroll', () => {
+            // Ogranicza częstotliwość przeliczania położenia
+            if(!scrolling) {
+                window.requestAnimationFrame(() => {
+                    langlist.RepositionSelf();
+                    scrolling = false;
+                });
+            }
 
-        scrolling = true;
-    });
+            scrolling = true;
+        });
+    }
 });
