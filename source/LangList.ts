@@ -29,6 +29,7 @@ namespace Msz2001.InterwikiLanglist {
         public async Populate(q_id: string, languages: Promise<Sitelink[]>) {
             this.View.SetWikidataElement(q_id);
             this.View.PopulateLanguagesList(await languages);
+            this.RepositionSelf();
         }
 
         /**
@@ -37,8 +38,8 @@ namespace Msz2001.InterwikiLanglist {
          */
         public Display(anchor: HTMLElement) {
             this.CurrentAnchor = anchor;
-            this.RepositionSelf();
             this.Wrapper.style.display = 'block';
+            this.RepositionSelf();
         }
 
         /**
@@ -73,14 +74,36 @@ namespace Msz2001.InterwikiLanglist {
         /**
          * Ustawia panel w taki sposób, by przylegał do ikonki "Wikidane"
          */
-        protected RepositionSelf() {
+        public RepositionSelf() {
             if(this.CurrentAnchor === null) return;
 
-            let scroll_offset = document.body.getBoundingClientRect().top;
-            let bounding_rect = this.CurrentAnchor.getBoundingClientRect();
+            let margin = 16; // Odległość od brzegów okna, której panel nie powinien przekroczyć
+            let horz_offset = 16; // Poziome przesunięcie brzegu panelu względem brzegu ikonki "Wikidane"
 
-            this.Wrapper.style.top = (bounding_rect.bottom - scroll_offset) + 'px';
-            this.Wrapper.style.left = bounding_rect.left + 'px';
+            let scroll_offset = -document.body.getBoundingClientRect().top;
+            let anchor_rect = this.CurrentAnchor.getBoundingClientRect();
+            let own_rect = this.Wrapper.getBoundingClientRect();
+
+            // Domyślnie panel wyświetla się pod ikonką i "w prawo"
+            let top = anchor_rect.bottom;
+            let left = anchor_rect.left - horz_offset;
+
+            if(top + own_rect.height > window.innerHeight - margin) {
+                // Trzeba panel ułożyć powyżej
+                top = Math.max(anchor_rect.top - own_rect.height, margin);
+            }
+
+            if(left + own_rect.width > window.innerWidth - margin) {
+                // Trzeba panel ułożyć "w lewo"
+                left = Math.max(anchor_rect.right - own_rect.width + horz_offset, margin);
+            }
+
+            this.Wrapper.style.top = (scroll_offset + top) + 'px';
+            this.Wrapper.style.left = left + 'px';
+
+            // Jeśli ikonka "Wikidane" wyszła poza ekran, ukryj
+            if(anchor_rect.bottom < 0 || anchor_rect.top > window.innerHeight) this.Hide();
+            if(anchor_rect.right < 0 || anchor_rect.left > window.innerWidth) this.Hide();
         }
     }
 }

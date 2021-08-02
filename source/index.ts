@@ -1,4 +1,4 @@
-(() => {
+$(() => {
     let wd_links = document.querySelectorAll('.link-interwiki-wd');
     let langlist = new Msz2001.InterwikiLanglist.LangList();
 
@@ -30,4 +30,18 @@
 
         if(is_out_X || is_out_Y) langlist.Hide();
     });
-})();
+
+    // Jeśli za blisko jednej z krawędzi, przesuń się
+    let scrolling = false;
+    window.addEventListener('scroll', () => {
+        // Ogranicza częstotliwość przeliczania położenia
+        if(!scrolling) {
+            window.requestAnimationFrame(() => {
+                langlist.RepositionSelf();
+                scrolling = false;
+            });
+        }
+
+        scrolling = true;
+    });
+});
