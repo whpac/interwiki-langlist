@@ -3,6 +3,9 @@ namespace Msz2001.InterwikiLanglist {
     export class LangList {
         /** Ramka, zawierająca listę języków */
         protected Wrapper: HTMLElement;
+        /** Widok dla listy */
+        protected View: LangListView;
+
         /** Element, do którego aktualnie jest zakotwiczona lista języków */
         protected CurrentAnchor: HTMLElement | null;
 
@@ -11,10 +14,20 @@ namespace Msz2001.InterwikiLanglist {
 
             this.Wrapper = document.createElement('div');
             this.Wrapper.classList.add('interwiki-langlist-wrapper');
-            this.Wrapper.textContent = 'English, Deutsch, ...';
             document.body.appendChild(this.Wrapper);
 
+            this.View = new LangListView(this.Wrapper);
+
             window.addEventListener('resize', this.RepositionSelf.bind(this));
+        }
+
+        /**
+         * Wypełnia listę języków
+         * @param q_id Identyfikator w Wikidanych
+         * @param languages Lista nazw w innych językach
+         */
+        public Populate(q_id: string, languages: string[]) {
+            this.View.SetWikidataElement(q_id);
         }
 
         /**
