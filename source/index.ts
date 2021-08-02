@@ -15,8 +15,19 @@
         }
 
         wd_link.addEventListener('mouseenter', () => {
-            langlist.Populate(q_id, []);
+            let sitelinks = Msz2001.InterwikiLanglist.WikidataClient.GetSitelinks(q_id);
+            langlist.Populate(q_id, sitelinks);
             langlist.Display(wd_link as HTMLElement);
         });
     }
+
+    // Służy do ukrywania selektora języków
+    document.addEventListener('mousemove', (ev) => {
+        let selector_rect = langlist.GetBoundingClientRect();
+
+        let is_out_X = ev.clientX < selector_rect.left || ev.clientX > selector_rect.right;
+        let is_out_Y = ev.clientY < selector_rect.top || ev.clientY > selector_rect.bottom;
+
+        if(is_out_X || is_out_Y) langlist.Hide();
+    });
 })();

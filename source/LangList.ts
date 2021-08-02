@@ -26,8 +26,9 @@ namespace Msz2001.InterwikiLanglist {
          * @param q_id Identyfikator w Wikidanych
          * @param languages Lista nazw w innych językach
          */
-        public Populate(q_id: string, languages: string[]) {
+        public async Populate(q_id: string, languages: Promise<Sitelink[]>) {
             this.View.SetWikidataElement(q_id);
+            this.View.PopulateLanguagesList(await languages);
         }
 
         /**
@@ -37,6 +38,36 @@ namespace Msz2001.InterwikiLanglist {
         public Display(anchor: HTMLElement) {
             this.CurrentAnchor = anchor;
             this.RepositionSelf();
+            this.Wrapper.style.display = 'block';
+        }
+
+        /**
+         * Ukrywa selektor języków
+         */
+        public Hide() {
+            this.CurrentAnchor = null;
+            this.Wrapper.style.display = 'none';
+            this.View.PrepareForNextDisplay();
+        }
+
+        /**
+         * Zwraca prostokąt, okalający selektor. Dodaje margines przekazany w parametrze
+         * @param margin Margines, który jest uznawany za należący do selektora
+         */
+        public GetBoundingClientRect(margin: number = 16) {
+            if(this.CurrentAnchor === null) {
+                return new DOMRect(0, 0, 0, 0);
+            }
+
+            let anchor_rect = this.CurrentAnchor.getBoundingClientRect();
+            let selector_rect = this.Wrapper.getBoundingClientRect();
+
+            let leftmost = Math.min(anchor_rect.left, selector_rect.left) - margin;
+            let rightmost = Math.max(anchor_rect.right, selector_rect.right) + margin;
+            let topmost = Math.min(anchor_rect.top, selector_rect.top) - margin;
+            let bottommost = Math.max(anchor_rect.bottom, selector_rect.bottom) + margin;
+
+            return new DOMRect(leftmost, topmost, rightmost - leftmost, bottommost - topmost);
         }
 
         /**
