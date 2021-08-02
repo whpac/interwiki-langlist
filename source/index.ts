@@ -12,6 +12,14 @@ $(() => {
 
             let q_pos = child.href.lastIndexOf('/Q');
             q_id = child.href.substr(q_pos + 1);
+
+            // Wyłączam link do Wikidanych
+            child.href = 'javascript:void(0)';
+            child.title = 'Zobacz, w jakich językach ten artykuł istnieje';
+            child.style.cursor = 'auto';
+            child.style.textDecoration = 'none';
+            child.style.fontSize = '0.8em';
+            child.textContent = '字';
         }
 
         wd_link.addEventListener('mouseenter', () => {
