@@ -31,3 +31,14 @@
     font-size:0.85em; border-top:1px solid #ddd; margin-top:4px; padding-top:4px;
     text-align:right;
 }
+
+
+/* Ciemna skórka - to co jest poniżej może trafić do kodu Ciemnego Wektora */
+html.enable-dark-skin .interwiki-langlist-wrapper {background:#222; border-color:#777;}
+html.enable-dark-skin .interwiki-langlist-wrapper header {border-bottom-color:#666;}
+html.enable-dark-skin .interwiki-langlist-wrapper footer {border-top-color:#666;}
+html.enable-dark-skin .interwiki-langlist-wrapper .no-links-notice,
+    html.enable-dark-skin .interwiki-langlist-wrapper .loading-notice {color:#999;}
+html.enable-dark-skin .interwiki-langlist-wrapper li.badge-anm::after,
+html.enable-dark-skin .interwiki-langlist-wrapper li.badge-lnm::after {border-color:#e4c000;}
+html.enable-dark-skin .interwiki-langlist-wrapper li.badge-da::after {border-color:#888;}
