@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "lib": [
+            "dom",
+            "dom.iterable",
+            "esnext"
+        ],
+        "allowJs": false,
+        "skipLibCheck": true,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+        "module": "system",
+        "moduleResolution": "node",
+        "outFile": "dist/interwiki-langlist.js"
+    },
+    "include": [
+        "./source",
+        "./node_modules/types-mediawiki"
+    ]
+}
