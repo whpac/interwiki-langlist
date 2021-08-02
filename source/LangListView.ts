@@ -1,9 +1,18 @@
 namespace Msz2001.InterwikiLanglist {
 
+    type ProcessedSitelink = {
+        Title: string;
+        LanguageCode: string;
+        LanguageName: string;
+        IsRecommended: boolean;
+        Badge: Badge;
+    };
+
     /** Klasa zarządzająca zawartością listy języków */
     export class LangListView {
         protected WikidataLink: HTMLAnchorElement;
         protected LanguagesList: HTMLElement;
+        protected NoLinks: HTMLElement;
 
         public constructor(wrapper: HTMLElement) {
             let header = document.createElement('header');
@@ -12,6 +21,11 @@ namespace Msz2001.InterwikiLanglist {
 
             this.LanguagesList = document.createElement('ul');
             wrapper.appendChild(this.LanguagesList);
+
+            this.NoLinks = document.createElement('div');
+            this.NoLinks.classList.add('no-links-notice');
+            this.NoLinks.textContent = 'Ten artykuł nie istnieje jeszcze w żadnym języku';
+            wrapper.appendChild(this.NoLinks);
 
             let footer = document.createElement('footer');
             footer.textContent = 'Pobrano z ';
@@ -40,10 +54,57 @@ namespace Msz2001.InterwikiLanglist {
         public PopulateLanguagesList(sitelinks: Sitelink[]) {
             this.LanguagesList.innerText = '';
 
-            for(let sitelink of this.SortAndFilterLinks(sitelinks)) {
+            let processed_links = this.SortAndFilterLinks(sitelinks);
+            let hidden_li: HTMLElement[] = [];
+            for(let sitelink of processed_links) {
                 let li = document.createElement('li');
-                li.innerHTML = `<a href="${this.BuildUrl(sitelink)}">${this.GetLanguageDisplayName(sitelink)}</a>`;
+                li.innerHTML = `<a href="${this.BuildUrl(sitelink)}">${sitelink.LanguageName}</a>`;
+
+                let badge_title = '';
+                switch(sitelink.Badge) {
+                    case Badge.AnM:
+                        li.classList.add('badge-anm');
+                        badge_title = ' – artykuł na medal';
+                        break;
+                    case Badge.LnM:
+                        li.classList.add('badge-lnm');
+                        badge_title = ' – lista na medal';
+                        break;
+                    case Badge.DA:
+                        li.classList.add('badge-da');
+                        badge_title = ' – dobry artykuł';
+                        break;
+                }
+                li.title = sitelink.Title + badge_title;
                 this.LanguagesList.appendChild(li);
+
+                if(!sitelink.IsRecommended) {
+                    hidden_li.push(li);
+                    li.style.display = 'none';
+                }
+            }
+
+            // Dodaj link "pokaż wszystkie"
+            if(hidden_li.length > 0) {
+                let li = document.createElement('li');
+                let a = document.createElement('a');
+                a.href = 'javascript:void(0)';
+                a.innerText = 'pokaż więcej';
+                li.appendChild(a);
+                li.appendChild(document.createTextNode(` (${hidden_li.length} ukrytych)`));
+                this.LanguagesList.appendChild(li);
+
+                a.addEventListener('click', () => {
+                    for(let elem of hidden_li) {
+                        elem.style.display = '';
+                    }
+                });
+            }
+
+            if(processed_links.length == 0) {
+                this.NoLinks.style.display = '';
+            } else {
+                this.LanguagesList.style.display = '';
             }
         }
 
@@ -54,13 +115,16 @@ namespace Msz2001.InterwikiLanglist {
         public PrepareForNextDisplay() {
             this.LanguagesList.innerText = '';
             this.LanguagesList.innerHTML = '<li>Ładowanie</li>';
+            this.LanguagesList.style.display = 'none';
+
+            this.NoLinks.style.display = 'none';
         }
 
         /**
          * Tworzy adres URL odpowiadający linkowi
          * @param sitelink Obiekt, reprezentujący link do projektu Wikimedia
          */
-        protected BuildUrl(sitelink: Sitelink) {
+        protected BuildUrl(sitelink: ProcessedSitelink) {
             let encoded_title = encodeURI(sitelink.Title.replace(' ', '_'));
             return `//${sitelink.LanguageCode}.wikipedia.org/wiki/${encoded_title}`;
         }
@@ -70,7 +134,7 @@ namespace Msz2001.InterwikiLanglist {
          * @param sitelink Obiekt, reprezentujący link do projektu Wikimedia
          */
         protected GetLanguageDisplayName(sitelink: Sitelink) {
-            //@ts-ignore - $.uls nie istnieje w definicjach
+            //@ts-ignore - $.uls nie istnieje w definicjach :(
             return $?.uls?.data?.getAutonym(sitelink.LanguageCode) ?? sitelink.LanguageCode;
         }
 
@@ -79,8 +143,39 @@ namespace Msz2001.InterwikiLanglist {
          * według odznaczeń oraz preferencji użytkownika, odczytanych z ULS
          * @param sitelinks Tablica linków do innych języków
          */
-        protected SortAndFilterLinks(sitelinks: Sitelink[]) {
-            return sitelinks;
+        protected SortAndFilterLinks(sitelinks: Sitelink[]): ProcessedSitelink[] {
+            //@ts-ignore - mw.uls nie istnieje w definicjach :(
+            let recommended_langs: Set<string> = new Set(mw?.uls?.getFrequentLanguageList() ?? []);
+
+            let processed_anm = [];
+            let processed_lnm = [];
+            let processed_da = [];
+            let processed_nobadge = [];
+
+            for(let sitelink of sitelinks) {
+                // Id innych projektów zawiera dopisek po "wiki"
+                if(!sitelink.Site.endsWith('wiki')) continue;
+                if(sitelink.Site == 'commonswiki'
+                    || sitelink.Site == 'metawiki'
+                    || sitelink.Site == 'wikidatawiki') continue;
+
+                let processed_link: ProcessedSitelink = {
+                    Title: sitelink.Title,
+                    LanguageCode: sitelink.LanguageCode,
+                    LanguageName: this.GetLanguageDisplayName(sitelink),
+                    IsRecommended: recommended_langs.has(sitelink.LanguageCode),
+                    Badge: sitelink.Badge
+                };
+
+                switch(processed_link.Badge) {
+                    case Badge.AnM: processed_anm.push(processed_link); break;
+                    case Badge.LnM: processed_lnm.push(processed_link); break;
+                    case Badge.DA: processed_da.push(processed_link); break;
+                    default: processed_nobadge.push(processed_link); break;
+                }
+            }
+
+            return processed_anm.concat(processed_lnm, processed_da, processed_nobadge);
         }
     }
 }

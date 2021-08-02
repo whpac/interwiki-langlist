@@ -4,7 +4,15 @@ namespace Msz2001.InterwikiLanglist {
         Title: string;
         Site: string;
         LanguageCode: string;
+        Badge: Badge;
     };
+
+    export enum Badge {
+        None,
+        AnM,
+        DA,
+        LnM
+    }
 
     /** Udostępnia interfejs do Wikidanych */
     export class WikidataClient {
@@ -57,18 +65,24 @@ namespace Msz2001.InterwikiLanglist {
             let links = [];
 
             for(let wiki_id in raw) {
-                let sitelink: { site?: string, title?: string; } = raw[wiki_id];
+                let sitelink: { site?: string; title?: string; badges?: string[]; } = raw[wiki_id];
 
                 if(!('site' in sitelink) || typeof sitelink.site !== 'string') continue;
                 if(!('title' in sitelink) || typeof sitelink.title !== 'string') continue;
 
                 let wiki_pos = sitelink.site.lastIndexOf('wiki');
                 let lang_code = sitelink.site.substr(0, wiki_pos);
+                let badge = Badge.None;
+
+                if(sitelink.badges?.includes('Q17437798')) badge = Badge.DA;
+                if(sitelink.badges?.includes('Q17506997')) badge = Badge.LnM;
+                if(sitelink.badges?.includes('Q17437796')) badge = Badge.AnM;
 
                 links.push({
                     Title: sitelink.title,
                     Site: sitelink.site,
-                    LanguageCode: lang_code
+                    LanguageCode: lang_code,
+                    Badge: badge
                 });
             }
 
