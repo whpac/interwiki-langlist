@@ -11,7 +11,6 @@ namespace Msz2001.InterwikiLanglist {
             wrapper.appendChild(header);
 
             this.LanguagesList = document.createElement('ul');
-            this.LanguagesList.innerHTML = '<li>English</li><li>Deutsch</li>';
             wrapper.appendChild(this.LanguagesList);
 
             let footer = document.createElement('footer');
@@ -22,6 +21,8 @@ namespace Msz2001.InterwikiLanglist {
             this.WikidataLink.textContent = 'elementu Wikidanych';
             this.WikidataLink.href = 'https://wikidata.org';
             footer.appendChild(this.WikidataLink);
+
+            this.PrepareForNextDisplay();
         }
 
         /**
@@ -39,7 +40,7 @@ namespace Msz2001.InterwikiLanglist {
         public PopulateLanguagesList(sitelinks: Sitelink[]) {
             this.LanguagesList.innerText = '';
 
-            for(let sitelink of sitelinks) {
+            for(let sitelink of this.SortAndFilterLinks(sitelinks)) {
                 let li = document.createElement('li');
                 li.innerHTML = `<a href="${this.BuildUrl(sitelink)}">${this.GetLanguageDisplayName(sitelink)}</a>`;
                 this.LanguagesList.appendChild(li);
@@ -69,7 +70,17 @@ namespace Msz2001.InterwikiLanglist {
          * @param sitelink Obiekt, reprezentujący link do projektu Wikimedia
          */
         protected GetLanguageDisplayName(sitelink: Sitelink) {
-            return $.uls.data.getAutonym(sitelink.LanguageCode);
+            //@ts-ignore - $.uls nie istnieje w definicjach
+            return $?.uls?.data?.getAutonym(sitelink.LanguageCode) ?? sitelink.LanguageCode;
+        }
+
+        /**
+         * Odfiltrowuje linki do innych projektów niż Wikipedia. Sortuje je
+         * według odznaczeń oraz preferencji użytkownika, odczytanych z ULS
+         * @param sitelinks Tablica linków do innych języków
+         */
+        protected SortAndFilterLinks(sitelinks: Sitelink[]) {
+            return sitelinks;
         }
     }
 }
