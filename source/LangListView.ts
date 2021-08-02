@@ -3,15 +3,16 @@ namespace Msz2001.InterwikiLanglist {
     /** Klasa zarządzająca zawartością listy języków */
     export class LangListView {
         protected WikidataLink: HTMLAnchorElement;
+        protected LanguagesList: HTMLElement;
 
         public constructor(wrapper: HTMLElement) {
             let header = document.createElement('header');
             header.textContent = 'Dostępne języki';
             wrapper.appendChild(header);
 
-            let content_list = document.createElement('ul');
-            content_list.innerHTML = '<li>English</li><li>Deutsch</li>';
-            wrapper.appendChild(content_list);
+            this.LanguagesList = document.createElement('ul');
+            this.LanguagesList.innerHTML = '<li>English</li><li>Deutsch</li>';
+            wrapper.appendChild(this.LanguagesList);
 
             let footer = document.createElement('footer');
             footer.textContent = 'Pobrano z ';
@@ -23,8 +24,52 @@ namespace Msz2001.InterwikiLanglist {
             footer.appendChild(this.WikidataLink);
         }
 
+        /**
+         * Ustawia link do powiązanego elementu Wikidanych
+         * @param q_id Identyfikator elementu Wikidanych
+         */
         public SetWikidataElement(q_id: string) {
             this.WikidataLink.href = `https://www.wikidata.org/wiki/Special:EntityData/${q_id}`;
+        }
+
+        /**
+         * Wypełnia listę linków do wersji językowych
+         * @param sitelinks Tablica linków do innych wersji językowych
+         */
+        public PopulateLanguagesList(sitelinks: Sitelink[]) {
+            this.LanguagesList.innerText = '';
+
+            for(let sitelink of sitelinks) {
+                let li = document.createElement('li');
+                li.innerHTML = `<a href="${this.BuildUrl(sitelink)}">${this.GetLanguageDisplayName(sitelink)}</a>`;
+                this.LanguagesList.appendChild(li);
+            }
+        }
+
+        /**
+         * Przygotowuje listę języków do pokazania na innym elemencie
+         * (tj. opróżnia ją i pokazuje ikonę ładowania).
+         */
+        public PrepareForNextDisplay() {
+            this.LanguagesList.innerText = '';
+            this.LanguagesList.innerHTML = '<li>Ładowanie</li>';
+        }
+
+        /**
+         * Tworzy adres URL odpowiadający linkowi
+         * @param sitelink Obiekt, reprezentujący link do projektu Wikimedia
+         */
+        protected BuildUrl(sitelink: Sitelink) {
+            let encoded_title = encodeURI(sitelink.Title.replace(' ', '_'));
+            return `//${sitelink.LanguageCode}.wikipedia.org/wiki/${encoded_title}`;
+        }
+
+        /**
+         * Zwraca wyświetlaną nazwę języka, w którym jest treść pod linkiem
+         * @param sitelink Obiekt, reprezentujący link do projektu Wikimedia
+         */
+        protected GetLanguageDisplayName(sitelink: Sitelink) {
+            return $.uls.data.getAutonym(sitelink.LanguageCode);
         }
     }
 }
