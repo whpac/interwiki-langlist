@@ -6,13 +6,29 @@ namespace Msz2001.InterwikiLanglist {
         LanguageCode: string;
     };
 
+    /** Udostępnia interfejs do Wikidanych */
     export class WikidataClient {
+        /** Przechowuje wcześniej pobrane linki. Czyszczone przy przeładowaniu strony */
+        protected static SitelinkCache: Map<string, Sitelink[]> = new Map();
 
         /**
-         * Zwraca listę linków do projektów siostrzanych
+         * Zwraca listę linków do innych wersji językowych
          * @param q_id Identyfikator elementu w Wikidanych
          */
-        public static GetSitelinks(q_id: string) {
+        public static async GetSitelinks(q_id: string): Promise<Sitelink[]> {
+            let cached = this.SitelinkCache.get(q_id);
+            if(cached !== undefined) return cached;
+
+            let sitelinks = this.FetchSitelinks(q_id);
+            this.SitelinkCache.set(q_id, await sitelinks);
+            return sitelinks;
+        }
+
+        /**
+         * Pobiera listę linków do innych wersji językowych z Wikidanych
+         * @param q_id Identyfikator elementu w Wikidanych
+         */
+        protected static FetchSitelinks(q_id: string) {
             return new Promise<Sitelink[]>((resolve, reject) => {
                 let params = {
                     action: 'wbgetentities',
