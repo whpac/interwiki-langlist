@@ -13,6 +13,7 @@ namespace Msz2001.InterwikiLanglist {
         protected WikidataLink: HTMLAnchorElement;
         protected LanguagesList: HTMLElement;
         protected NoLinks: HTMLElement;
+        protected Loading: HTMLElement;
 
         public constructor(wrapper: HTMLElement) {
             let header = document.createElement('header');
@@ -26,6 +27,11 @@ namespace Msz2001.InterwikiLanglist {
             this.NoLinks.classList.add('no-links-notice');
             this.NoLinks.textContent = 'Ten artykuł nie istnieje jeszcze w żadnym języku';
             wrapper.appendChild(this.NoLinks);
+
+            this.Loading = document.createElement('div');
+            this.Loading.classList.add('loading-notice');
+            this.Loading.textContent = 'Wczytywanie...';
+            wrapper.appendChild(this.Loading);
 
             let footer = document.createElement('footer');
             footer.textContent = 'Pobrano z ';
@@ -78,7 +84,7 @@ namespace Msz2001.InterwikiLanglist {
                 li.title = sitelink.Title + badge_title;
                 this.LanguagesList.appendChild(li);
 
-                if(!sitelink.IsRecommended) {
+                if(!sitelink.IsRecommended && processed_links.length > 10) {
                     hidden_li.push(li);
                     li.style.display = 'none';
                 }
@@ -106,6 +112,7 @@ namespace Msz2001.InterwikiLanglist {
             } else {
                 this.LanguagesList.style.display = '';
             }
+            this.Loading.style.display = 'none';
         }
 
         /**
@@ -114,10 +121,10 @@ namespace Msz2001.InterwikiLanglist {
          */
         public PrepareForNextDisplay() {
             this.LanguagesList.innerText = '';
-            this.LanguagesList.innerHTML = '<li>Ładowanie</li>';
             this.LanguagesList.style.display = 'none';
 
             this.NoLinks.style.display = 'none';
+            this.Loading.style.display = '';
         }
 
         /**
