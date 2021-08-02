@@ -454,12 +454,14 @@ var Msz2001;
 })(Msz2001 || (Msz2001 = {}));
 $(function () {
     var e_4, _a;
+    // Wyszukaj interwiki do Wikidanych
     var wd_links = document.querySelectorAll('.link-interwiki-wd');
     var langlist = new Msz2001.InterwikiLanglist.LangList();
     var _loop_1 = function (wd_link) {
         var e_5, _b;
         if (!(wd_link instanceof HTMLElement))
             return "continue";
+        // Znajdź link i wyciągnij z niego identyfikator elementu
         var q_id = '';
         try {
             for (var _c = (e_5 = void 0, __values(wd_link.children)), _d = _c.next(); !_d.done; _d = _c.next()) {
@@ -470,7 +472,7 @@ $(function () {
                     continue;
                 var q_pos = child.href.lastIndexOf('/Q');
                 q_id = child.href.substr(q_pos + 1);
-                // Wyłączam link do Wikidanych
+                // Wyłącz link do Wikidanych i zastąp ikonkę bardziej czytelnym symbolem
                 child.href = 'javascript:void(0)';
                 child.title = 'Zobacz, w jakich językach ten artykuł istnieje';
                 child.style.cursor = 'auto';
@@ -486,6 +488,7 @@ $(function () {
             }
             finally { if (e_5) throw e_5.error; }
         }
+        // Po najechaniu ikonki "Wikidane", pokaż panel z językami
         wd_link.addEventListener('mouseenter', function () {
             var sitelinks = Msz2001.InterwikiLanglist.WikidataClient.GetSitelinks(q_id);
             langlist.Populate(q_id, sitelinks);
