@@ -104,6 +104,7 @@ namespace Msz2001.InterwikiLanglist {
                     for(let elem of hidden_li) {
                         elem.style.display = '';
                     }
+                    li.remove();
                 });
             }
 
