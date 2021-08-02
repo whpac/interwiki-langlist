@@ -54,6 +54,7 @@ var Msz2001;
             function LangList() {
                 this.CurrentAnchor = null;
                 this.Wrapper = document.createElement('div');
+                this.Wrapper.style.display = 'none';
                 this.Wrapper.classList.add('interwiki-langlist-wrapper');
                 document.body.appendChild(this.Wrapper);
                 this.View = new InterwikiLanglist.LangListView(this.Wrapper);

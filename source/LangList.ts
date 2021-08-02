@@ -13,6 +13,7 @@ namespace Msz2001.InterwikiLanglist {
             this.CurrentAnchor = null;
 
             this.Wrapper = document.createElement('div');
+            this.Wrapper.style.display = 'none';
             this.Wrapper.classList.add('interwiki-langlist-wrapper');
             document.body.appendChild(this.Wrapper);
 
