@@ -14,6 +14,7 @@ namespace Msz2001.InterwikiLanglist {
         protected LanguagesList: HTMLElement;
         protected NoLinks: HTMLElement;
         protected Loading: HTMLElement;
+        protected LoadingError: HTMLElement;
 
         public constructor(wrapper: HTMLElement) {
             let header = document.createElement('header');
@@ -24,14 +25,19 @@ namespace Msz2001.InterwikiLanglist {
             wrapper.appendChild(this.LanguagesList);
 
             this.NoLinks = document.createElement('div');
-            this.NoLinks.classList.add('no-links-notice');
+            this.NoLinks.classList.add('notice');
             this.NoLinks.textContent = 'Ten artykuł nie istnieje jeszcze w żadnym języku';
             wrapper.appendChild(this.NoLinks);
 
             this.Loading = document.createElement('div');
-            this.Loading.classList.add('loading-notice');
+            this.Loading.classList.add('notice');
             this.Loading.textContent = 'Wczytywanie...';
             wrapper.appendChild(this.Loading);
+
+            this.LoadingError = document.createElement('div');
+            this.LoadingError.classList.add('notice');
+            this.LoadingError.textContent = 'Nie udało się wczytać listy języków';
+            wrapper.appendChild(this.LoadingError);
 
             let footer = document.createElement('footer');
             footer.textContent = 'Pobrano z ';
@@ -125,7 +131,16 @@ namespace Msz2001.InterwikiLanglist {
             this.LanguagesList.style.display = 'none';
 
             this.NoLinks.style.display = 'none';
+            this.LoadingError.style.display = 'none';
             this.Loading.style.display = '';
+        }
+
+        /**
+         * Wyświetla komunikat o błędzie wczytywania danych
+         */
+        public DisplayLoadingError() {
+            this.Loading.style.display = 'none';
+            this.LoadingError.style.display = '';
         }
 
         /**

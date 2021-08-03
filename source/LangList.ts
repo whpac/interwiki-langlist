@@ -9,6 +9,11 @@ namespace Msz2001.InterwikiLanglist {
         /** Element, do którego aktualnie jest zakotwiczona lista języków */
         protected CurrentAnchor: HTMLElement | null;
 
+        /** Czy panel jest widoczny */
+        public get IsVisible() {
+            return this.CurrentAnchor !== null;
+        }
+
         public constructor() {
             this.CurrentAnchor = null;
 
@@ -29,7 +34,11 @@ namespace Msz2001.InterwikiLanglist {
          */
         public async Populate(q_id: string, languages: Promise<Sitelink[]>) {
             this.View.SetWikidataElement(q_id);
-            this.View.PopulateLanguagesList(await languages);
+            try {
+                this.View.PopulateLanguagesList(await languages);
+            } catch(e) {
+                this.View.DisplayLoadingError();
+            }
             this.RepositionSelf();
         }
 

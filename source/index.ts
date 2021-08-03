@@ -18,7 +18,7 @@ $(() => {
             // Wyłącz link do Wikidanych i zastąp ikonkę bardziej czytelnym symbolem
             child.href = 'javascript:void(0)';
             child.title = 'Zobacz, w jakich językach ten artykuł istnieje';
-            child.style.cursor = 'auto';
+            child.style.cursor = 'default';
             child.style.textDecoration = 'none';
             child.style.fontSize = '0.8em';
             child.textContent = '字';
@@ -26,6 +26,8 @@ $(() => {
 
         // Po najechaniu ikonki "Wikidane", pokaż panel z językami
         wd_link.addEventListener('mouseenter', () => {
+            if(langlist.IsVisible) return;
+
             let sitelinks = Msz2001.InterwikiLanglist.WikidataClient.GetSitelinks(q_id);
             langlist.Populate(q_id, sitelinks);
             langlist.Display(wd_link as HTMLElement);
