@@ -27,8 +27,8 @@ namespace Msz2001.InterwikiLanglist {
             let cached = this.SitelinkCache.get(q_id);
             if(cached !== undefined) return cached;
 
-            let sitelinks = this.FetchSitelinks(q_id);
-            this.SitelinkCache.set(q_id, await sitelinks);
+            let sitelinks = await this.FetchSitelinks(q_id);
+            this.SitelinkCache.set(q_id, sitelinks);
             return sitelinks;
         }
 
@@ -38,20 +38,23 @@ namespace Msz2001.InterwikiLanglist {
          */
         protected static FetchSitelinks(q_id: string) {
             return new Promise<Sitelink[]>((resolve, reject) => {
-                let params = {
-                    action: 'wbgetentities',
-                    ids: q_id,
-                    props: 'sitelinks'
-                };
-                let api = new mw.ForeignApi('https://www.wikidata.org/w/api.php');
 
-                api.get(params).done(function (data) {
-                    let entity = data.entities[q_id];
+                // mw.ForeignApi nie istnieje u użytkowników niezalogowanych
+                // Dlatego żądanie trzeba zrealizować "ręcznie"
+                var xhr = new XMLHttpRequest();
+                xhr.addEventListener('load', () => {
+                    try {
+                        let data = JSON.parse(xhr.responseText);
+                        let entity = data.entities[q_id];
 
-                    resolve(WikidataClient.ParseSitelinks(entity.sitelinks));
-                }).catch((err) => {
-                    reject(err);
+                        resolve(WikidataClient.ParseSitelinks(entity.sitelinks));
+                    } catch(e) {
+                        reject(e);
+                    }
                 });
+                xhr.addEventListener('error', () => reject());
+                xhr.open('GET', `https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=${q_id}&origin=https%3A%2F%2Fpl.wikipedia.org&props=sitelinks`, true);
+                xhr.send();
             });
         }
 
