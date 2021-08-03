@@ -141,7 +141,6 @@ var Msz2001;
                     return;
                 var margin = 16; // Odległość od brzegów okna, której panel nie powinien przekroczyć
                 var horz_offset = 16; // Poziome przesunięcie brzegu panelu względem brzegu ikonki "Wikidane"
-                var scroll_offset = -document.body.getBoundingClientRect().top;
                 var anchor_rect = this.CurrentAnchor.getBoundingClientRect();
                 var own_rect = this.Wrapper.getBoundingClientRect();
                 // Domyślnie panel wyświetla się pod ikonką i "w prawo"
@@ -155,7 +154,7 @@ var Msz2001;
                     // Trzeba panel ułożyć "w lewo"
                     left = Math.max(anchor_rect.right - own_rect.width + horz_offset, margin);
                 }
-                this.Wrapper.style.top = (scroll_offset + top) + 'px';
+                this.Wrapper.style.top = top + 'px';
                 this.Wrapper.style.left = left + 'px';
                 // Jeśli ikonka "Wikidane" wyszła poza ekran, ukryj
                 if (anchor_rect.bottom < 0 || anchor_rect.top > window.innerHeight)

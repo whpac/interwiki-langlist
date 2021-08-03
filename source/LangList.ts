@@ -90,7 +90,6 @@ namespace Msz2001.InterwikiLanglist {
             let margin = 16; // Odległość od brzegów okna, której panel nie powinien przekroczyć
             let horz_offset = 16; // Poziome przesunięcie brzegu panelu względem brzegu ikonki "Wikidane"
 
-            let scroll_offset = -document.body.getBoundingClientRect().top;
             let anchor_rect = this.CurrentAnchor.getBoundingClientRect();
             let own_rect = this.Wrapper.getBoundingClientRect();
 
@@ -108,7 +107,7 @@ namespace Msz2001.InterwikiLanglist {
                 left = Math.max(anchor_rect.right - own_rect.width + horz_offset, margin);
             }
 
-            this.Wrapper.style.top = (scroll_offset + top) + 'px';
+            this.Wrapper.style.top = top + 'px';
             this.Wrapper.style.left = left + 'px';
 
             // Jeśli ikonka "Wikidane" wyszła poza ekran, ukryj
