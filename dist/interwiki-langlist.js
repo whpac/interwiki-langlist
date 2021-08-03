@@ -60,6 +60,14 @@ var Msz2001;
                 this.View = new InterwikiLanglist.LangListView(this.Wrapper);
                 window.addEventListener('resize', this.RepositionSelf.bind(this));
             }
+            Object.defineProperty(LangList.prototype, "IsVisible", {
+                /** Czy panel jest widoczny */
+                get: function () {
+                    return this.CurrentAnchor !== null;
+                },
+                enumerable: false,
+                configurable: true
+            });
             /**
              * Wypełnia listę języków
              * @param q_id Identyfikator w Wikidanych
@@ -67,15 +75,24 @@ var Msz2001;
              */
             LangList.prototype.Populate = function (q_id, languages) {
                 return __awaiter(this, void 0, void 0, function () {
-                    var _a, _b;
+                    var _a, _b, e_1;
                     return __generator(this, function (_c) {
                         switch (_c.label) {
                             case 0:
                                 this.View.SetWikidataElement(q_id);
+                                _c.label = 1;
+                            case 1:
+                                _c.trys.push([1, 3, , 4]);
                                 _b = (_a = this.View).PopulateLanguagesList;
                                 return [4 /*yield*/, languages];
-                            case 1:
+                            case 2:
                                 _b.apply(_a, [_c.sent()]);
+                                return [3 /*break*/, 4];
+                            case 3:
+                                e_1 = _c.sent();
+                                this.View.DisplayLoadingError();
+                                return [3 /*break*/, 4];
+                            case 4:
                                 this.RepositionSelf();
                                 return [2 /*return*/];
                         }
@@ -164,13 +181,17 @@ var Msz2001;
                 this.LanguagesList = document.createElement('ul');
                 wrapper.appendChild(this.LanguagesList);
                 this.NoLinks = document.createElement('div');
-                this.NoLinks.classList.add('no-links-notice');
+                this.NoLinks.classList.add('notice');
                 this.NoLinks.textContent = 'Ten artykuł nie istnieje jeszcze w żadnym języku';
                 wrapper.appendChild(this.NoLinks);
                 this.Loading = document.createElement('div');
-                this.Loading.classList.add('loading-notice');
+                this.Loading.classList.add('notice');
                 this.Loading.textContent = 'Wczytywanie...';
                 wrapper.appendChild(this.Loading);
+                this.LoadingError = document.createElement('div');
+                this.LoadingError.classList.add('notice');
+                this.LoadingError.textContent = 'Nie udało się wczytać listy języków';
+                wrapper.appendChild(this.LoadingError);
                 var footer = document.createElement('footer');
                 footer.textContent = 'Pobrano z ';
                 wrapper.appendChild(footer);
@@ -192,7 +213,7 @@ var Msz2001;
              * @param sitelinks Tablica linków do innych wersji językowych
              */
             LangListView.prototype.PopulateLanguagesList = function (sitelinks) {
-                var e_1, _a;
+                var e_2, _a;
                 this.LanguagesList.innerText = '';
                 var processed_links = this.SortAndFilterLinks(sitelinks);
                 var hidden_li = [];
@@ -224,12 +245,12 @@ var Msz2001;
                         }
                     }
                 }
-                catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                catch (e_2_1) { e_2 = { error: e_2_1 }; }
                 finally {
                     try {
                         if (processed_links_1_1 && !processed_links_1_1.done && (_a = processed_links_1.return)) _a.call(processed_links_1);
                     }
-                    finally { if (e_1) throw e_1.error; }
+                    finally { if (e_2) throw e_2.error; }
                 }
                 // Dodaj link "pokaż wszystkie"
                 if (hidden_li.length > 0) {
@@ -241,19 +262,19 @@ var Msz2001;
                     li_1.appendChild(document.createTextNode(" (" + hidden_li.length + " ukrytych)"));
                     this.LanguagesList.appendChild(li_1);
                     a.addEventListener('click', function () {
-                        var e_2, _a;
+                        var e_3, _a;
                         try {
                             for (var hidden_li_1 = __values(hidden_li), hidden_li_1_1 = hidden_li_1.next(); !hidden_li_1_1.done; hidden_li_1_1 = hidden_li_1.next()) {
                                 var elem = hidden_li_1_1.value;
                                 elem.style.display = '';
                             }
                         }
-                        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                        catch (e_3_1) { e_3 = { error: e_3_1 }; }
                         finally {
                             try {
                                 if (hidden_li_1_1 && !hidden_li_1_1.done && (_a = hidden_li_1.return)) _a.call(hidden_li_1);
                             }
-                            finally { if (e_2) throw e_2.error; }
+                            finally { if (e_3) throw e_3.error; }
                         }
                         li_1.remove();
                     });
@@ -274,7 +295,15 @@ var Msz2001;
                 this.LanguagesList.innerText = '';
                 this.LanguagesList.style.display = 'none';
                 this.NoLinks.style.display = 'none';
+                this.LoadingError.style.display = 'none';
                 this.Loading.style.display = '';
+            };
+            /**
+             * Wyświetla komunikat o błędzie wczytywania danych
+             */
+            LangListView.prototype.DisplayLoadingError = function () {
+                this.Loading.style.display = 'none';
+                this.LoadingError.style.display = '';
             };
             /**
              * Tworzy adres URL odpowiadający linkowi
@@ -299,7 +328,7 @@ var Msz2001;
              * @param sitelinks Tablica linków do innych języków
              */
             LangListView.prototype.SortAndFilterLinks = function (sitelinks) {
-                var e_3, _a;
+                var e_4, _a;
                 var _b, _c;
                 //@ts-ignore - mw.uls nie istnieje w definicjach :(
                 var recommended_langs = new Set((_c = (_b = mw === null || mw === void 0 ? void 0 : mw.uls) === null || _b === void 0 ? void 0 : _b.getFrequentLanguageList()) !== null && _c !== void 0 ? _c : []);
@@ -340,12 +369,12 @@ var Msz2001;
                         }
                     }
                 }
-                catch (e_3_1) { e_3 = { error: e_3_1 }; }
+                catch (e_4_1) { e_4 = { error: e_4_1 }; }
                 finally {
                     try {
                         if (sitelinks_1_1 && !sitelinks_1_1.done && (_a = sitelinks_1.return)) _a.call(sitelinks_1);
                     }
-                    finally { if (e_3) throw e_3.error; }
+                    finally { if (e_4) throw e_4.error; }
                 }
                 return processed_anm.concat(processed_lnm, processed_da, processed_nobadge);
             };
@@ -375,19 +404,17 @@ var Msz2001;
              */
             WikidataClient.GetSitelinks = function (q_id) {
                 return __awaiter(this, void 0, void 0, function () {
-                    var cached, sitelinks, _a, _b, _c;
-                    return __generator(this, function (_d) {
-                        switch (_d.label) {
+                    var cached, sitelinks;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
                             case 0:
                                 cached = this.SitelinkCache.get(q_id);
                                 if (cached !== undefined)
                                     return [2 /*return*/, cached];
-                                sitelinks = this.FetchSitelinks(q_id);
-                                _b = (_a = this.SitelinkCache).set;
-                                _c = [q_id];
-                                return [4 /*yield*/, sitelinks];
+                                return [4 /*yield*/, this.FetchSitelinks(q_id)];
                             case 1:
-                                _b.apply(_a, _c.concat([_d.sent()]));
+                                sitelinks = _a.sent();
+                                this.SitelinkCache.set(q_id, sitelinks);
                                 return [2 /*return*/, sitelinks];
                         }
                     });
@@ -399,18 +426,22 @@ var Msz2001;
              */
             WikidataClient.FetchSitelinks = function (q_id) {
                 return new Promise(function (resolve, reject) {
-                    var params = {
-                        action: 'wbgetentities',
-                        ids: q_id,
-                        props: 'sitelinks'
-                    };
-                    var api = new mw.ForeignApi('https://www.wikidata.org/w/api.php');
-                    api.get(params).done(function (data) {
-                        var entity = data.entities[q_id];
-                        resolve(WikidataClient.ParseSitelinks(entity.sitelinks));
-                    }).catch(function (err) {
-                        reject(err);
+                    // mw.ForeignApi nie istnieje u użytkowników niezalogowanych
+                    // Dlatego żądanie trzeba zrealizować "ręcznie"
+                    var xhr = new XMLHttpRequest();
+                    xhr.addEventListener('load', function () {
+                        try {
+                            var data = JSON.parse(xhr.responseText);
+                            var entity = data.entities[q_id];
+                            resolve(WikidataClient.ParseSitelinks(entity.sitelinks));
+                        }
+                        catch (e) {
+                            reject(e);
+                        }
                     });
+                    xhr.addEventListener('error', function () { return reject(); });
+                    xhr.open('GET', "https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=" + q_id + "&origin=https%3A%2F%2Fpl.wikipedia.org&props=sitelinks", true);
+                    xhr.send();
                 });
             };
             /**
@@ -454,18 +485,18 @@ var Msz2001;
     })(InterwikiLanglist = Msz2001.InterwikiLanglist || (Msz2001.InterwikiLanglist = {}));
 })(Msz2001 || (Msz2001 = {}));
 $(function () {
-    var e_4, _a;
+    var e_5, _a;
     // Wyszukaj interwiki do Wikidanych
     var wd_links = document.querySelectorAll('.link-interwiki-wd');
     var langlist = new Msz2001.InterwikiLanglist.LangList();
     var _loop_1 = function (wd_link) {
-        var e_5, _b;
+        var e_6, _b;
         if (!(wd_link instanceof HTMLElement))
             return "continue";
         // Znajdź link i wyciągnij z niego identyfikator elementu
         var q_id = '';
         try {
-            for (var _c = (e_5 = void 0, __values(wd_link.children)), _d = _c.next(); !_d.done; _d = _c.next()) {
+            for (var _c = (e_6 = void 0, __values(wd_link.children)), _d = _c.next(); !_d.done; _d = _c.next()) {
                 var child = _d.value;
                 if (!(child instanceof HTMLAnchorElement))
                     continue;
@@ -476,21 +507,23 @@ $(function () {
                 // Wyłącz link do Wikidanych i zastąp ikonkę bardziej czytelnym symbolem
                 child.href = 'javascript:void(0)';
                 child.title = 'Zobacz, w jakich językach ten artykuł istnieje';
-                child.style.cursor = 'auto';
+                child.style.cursor = 'default';
                 child.style.textDecoration = 'none';
                 child.style.fontSize = '0.8em';
                 child.textContent = '字';
             }
         }
-        catch (e_5_1) { e_5 = { error: e_5_1 }; }
+        catch (e_6_1) { e_6 = { error: e_6_1 }; }
         finally {
             try {
                 if (_d && !_d.done && (_b = _c.return)) _b.call(_c);
             }
-            finally { if (e_5) throw e_5.error; }
+            finally { if (e_6) throw e_6.error; }
         }
         // Po najechaniu ikonki "Wikidane", pokaż panel z językami
         wd_link.addEventListener('mouseenter', function () {
+            if (langlist.IsVisible)
+                return;
             var sitelinks = Msz2001.InterwikiLanglist.WikidataClient.GetSitelinks(q_id);
             langlist.Populate(q_id, sitelinks);
             langlist.Display(wd_link);
@@ -502,12 +535,12 @@ $(function () {
             _loop_1(wd_link);
         }
     }
-    catch (e_4_1) { e_4 = { error: e_4_1 }; }
+    catch (e_5_1) { e_5 = { error: e_5_1 }; }
     finally {
         try {
             if (wd_links_1_1 && !wd_links_1_1.done && (_a = wd_links_1.return)) _a.call(wd_links_1);
         }
-        finally { if (e_4) throw e_4.error; }
+        finally { if (e_5) throw e_5.error; }
     }
     if (wd_links.length > 0) {
         // Służy do ukrywania selektora języków
