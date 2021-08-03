@@ -22,8 +22,7 @@
 }
 .interwiki-langlist-wrapper li.badge-da::after {border-color:silver;}
 
-.interwiki-langlist-wrapper .no-links-notice,
-.interwiki-langlist-wrapper .loading-notice {
+.interwiki-langlist-wrapper .notice {
     color:#666; text-align:center; font-style:italic; font-size:0.85em; padding:4px;
 }
 
@@ -37,8 +36,7 @@
 html.enable-dark-skin .interwiki-langlist-wrapper {background:#222; border-color:#777;}
 html.enable-dark-skin .interwiki-langlist-wrapper header {border-bottom-color:#666;}
 html.enable-dark-skin .interwiki-langlist-wrapper footer {border-top-color:#666;}
-html.enable-dark-skin .interwiki-langlist-wrapper .no-links-notice,
-    html.enable-dark-skin .interwiki-langlist-wrapper .loading-notice {color:#999;}
+html.enable-dark-skin .interwiki-langlist-wrapper .notice {color:#999;}
 html.enable-dark-skin .interwiki-langlist-wrapper li.badge-anm::after,
 html.enable-dark-skin .interwiki-langlist-wrapper li.badge-lnm::after {border-color:#e4c000;}
 html.enable-dark-skin .interwiki-langlist-wrapper li.badge-da::after {border-color:#888;}
