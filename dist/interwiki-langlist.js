@@ -332,6 +332,8 @@ var Msz2001;
                 var _b, _c;
                 //@ts-ignore - mw.uls nie istnieje w definicjach :(
                 var recommended_langs = new Set((_c = (_b = mw === null || mw === void 0 ? void 0 : mw.uls) === null || _b === void 0 ? void 0 : _b.getFrequentLanguageList()) !== null && _c !== void 0 ? _c : []);
+                // Upewnij się, że w rekomendowanych językach jest kilka ważniejszych Wikipedii
+                recommended_langs.add('en').add('de').add('fr').add('ru').add('es');
                 var processed_anm = [];
                 var processed_lnm = [];
                 var processed_da = [];

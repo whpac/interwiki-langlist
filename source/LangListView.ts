@@ -169,6 +169,8 @@ namespace Msz2001.InterwikiLanglist {
         protected SortAndFilterLinks(sitelinks: Sitelink[]): ProcessedSitelink[] {
             //@ts-ignore - mw.uls nie istnieje w definicjach :(
             let recommended_langs: Set<string> = new Set(mw?.uls?.getFrequentLanguageList() ?? []);
+            // Upewnij się, że w rekomendowanych językach jest kilka ważniejszych Wikipedii
+            recommended_langs.add('en').add('de').add('fr').add('ru').add('es');
 
             let processed_anm = [];
             let processed_lnm = [];
