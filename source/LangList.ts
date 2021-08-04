@@ -1,10 +1,18 @@
 namespace Msz2001.InterwikiLanglist {
 
+    export enum VisibilityChangeReason {
+        MouseMove,
+        KeyPress,
+        Scroll
+    }
+
     export class LangList {
         /** Ramka, zawierająca listę języków */
         protected Wrapper: HTMLElement;
         /** Widok dla listy */
         protected View: LangListView;
+        /** Czy panel został automatycznie sfokusowany */
+        protected AutoFocused: boolean = false;
 
         /** Element, do którego aktualnie jest zakotwiczona lista języków */
         protected CurrentAnchor: HTMLElement | null;
@@ -39,6 +47,7 @@ namespace Msz2001.InterwikiLanglist {
             } catch(e) {
                 this.View.DisplayLoadingError();
             }
+            if(this.AutoFocused) this.View.FocusFirstLink();
             this.RepositionSelf();
         }
 
@@ -46,16 +55,34 @@ namespace Msz2001.InterwikiLanglist {
          * Wyświetla selektor języków "przypięty" do danego linku
          * @param anchor Ikonka "Wikidane", do której należy przypiąć panel
          */
-        public Display(anchor: HTMLElement) {
+        public Display(anchor: HTMLElement, reason: VisibilityChangeReason) {
             this.CurrentAnchor = anchor;
+            this.AutoFocused = reason == VisibilityChangeReason.KeyPress;
+
             this.Wrapper.style.display = 'block';
             this.RepositionSelf();
         }
 
         /**
          * Ukrywa selektor języków
+         * @param reason Powód ukrycia
          */
-        public Hide() {
+        public Hide(reason: VisibilityChangeReason) {
+            // Jeśli pokazano po kliknięciu, ignoruj wyjeżdżanie myszą
+            if(reason == VisibilityChangeReason.MouseMove
+                && this.AutoFocused) return;
+
+            // Przywróć fokus do dokumentu
+            if(this.AutoFocused && this.CurrentAnchor !== null) {
+                for(let child of this.CurrentAnchor.children) {
+                    if(child instanceof HTMLAnchorElement) {
+                        child.focus();
+                        break;
+                    }
+                }
+                this.CurrentAnchor.focus();
+            }
+
             this.CurrentAnchor = null;
             this.Wrapper.style.display = 'none';
             this.View.PrepareForNextDisplay();
@@ -111,8 +138,18 @@ namespace Msz2001.InterwikiLanglist {
             this.Wrapper.style.left = left + 'px';
 
             // Jeśli ikonka "Wikidane" wyszła poza ekran, ukryj
-            if(anchor_rect.bottom < 0 || anchor_rect.top > window.innerHeight) this.Hide();
-            if(anchor_rect.right < 0 || anchor_rect.left > window.innerWidth) this.Hide();
+            if(anchor_rect.bottom < 0 || anchor_rect.top > window.innerHeight) this.Hide(VisibilityChangeReason.Scroll);
+            if(anchor_rect.right < 0 || anchor_rect.left > window.innerWidth) this.Hide(VisibilityChangeReason.Scroll);
+        }
+
+        /**
+         * Sprawdza, czy element należy do panelu lub kotwicy
+         * @param element Element do sprawdzenia
+         */
+        public IsElementRelatedToPanel(element: HTMLElement) {
+            if(this.Wrapper.contains(element) || this.Wrapper === element) return true;
+            if(this.CurrentAnchor?.contains(element) || this.CurrentAnchor === element) return true;
+            return false;
         }
     }
 }

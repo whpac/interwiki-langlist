@@ -50,8 +50,16 @@ var Msz2001;
 (function (Msz2001) {
     var InterwikiLanglist;
     (function (InterwikiLanglist) {
+        var VisibilityChangeReason;
+        (function (VisibilityChangeReason) {
+            VisibilityChangeReason[VisibilityChangeReason["MouseMove"] = 0] = "MouseMove";
+            VisibilityChangeReason[VisibilityChangeReason["KeyPress"] = 1] = "KeyPress";
+            VisibilityChangeReason[VisibilityChangeReason["Scroll"] = 2] = "Scroll";
+        })(VisibilityChangeReason = InterwikiLanglist.VisibilityChangeReason || (InterwikiLanglist.VisibilityChangeReason = {}));
         var LangList = /** @class */ (function () {
             function LangList() {
+                /** Czy panel został automatycznie sfokusowany */
+                this.AutoFocused = false;
                 this.CurrentAnchor = null;
                 this.Wrapper = document.createElement('div');
                 this.Wrapper.style.display = 'none';
@@ -93,6 +101,8 @@ var Msz2001;
                                 this.View.DisplayLoadingError();
                                 return [3 /*break*/, 4];
                             case 4:
+                                if (this.AutoFocused)
+                                    this.View.FocusFirstLink();
                                 this.RepositionSelf();
                                 return [2 /*return*/];
                         }
@@ -103,15 +113,42 @@ var Msz2001;
              * Wyświetla selektor języków "przypięty" do danego linku
              * @param anchor Ikonka "Wikidane", do której należy przypiąć panel
              */
-            LangList.prototype.Display = function (anchor) {
+            LangList.prototype.Display = function (anchor, reason) {
                 this.CurrentAnchor = anchor;
+                this.AutoFocused = reason == VisibilityChangeReason.KeyPress;
                 this.Wrapper.style.display = 'block';
                 this.RepositionSelf();
             };
             /**
              * Ukrywa selektor języków
+             * @param reason Powód ukrycia
              */
-            LangList.prototype.Hide = function () {
+            LangList.prototype.Hide = function (reason) {
+                var e_2, _a;
+                // Jeśli pokazano po kliknięciu, ignoruj wyjeżdżanie myszą
+                if (reason == VisibilityChangeReason.MouseMove
+                    && this.AutoFocused)
+                    return;
+                // Przywróć fokus do dokumentu
+                if (this.AutoFocused && this.CurrentAnchor !== null) {
+                    try {
+                        for (var _b = __values(this.CurrentAnchor.children), _c = _b.next(); !_c.done; _c = _b.next()) {
+                            var child = _c.value;
+                            if (child instanceof HTMLAnchorElement) {
+                                child.focus();
+                                break;
+                            }
+                        }
+                    }
+                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                    finally {
+                        try {
+                            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                        }
+                        finally { if (e_2) throw e_2.error; }
+                    }
+                    this.CurrentAnchor.focus();
+                }
                 this.CurrentAnchor = null;
                 this.Wrapper.style.display = 'none';
                 this.View.PrepareForNextDisplay();
@@ -158,9 +195,21 @@ var Msz2001;
                 this.Wrapper.style.left = left + 'px';
                 // Jeśli ikonka "Wikidane" wyszła poza ekran, ukryj
                 if (anchor_rect.bottom < 0 || anchor_rect.top > window.innerHeight)
-                    this.Hide();
+                    this.Hide(VisibilityChangeReason.Scroll);
                 if (anchor_rect.right < 0 || anchor_rect.left > window.innerWidth)
-                    this.Hide();
+                    this.Hide(VisibilityChangeReason.Scroll);
+            };
+            /**
+             * Sprawdza, czy element należy do panelu lub kotwicy
+             * @param element Element do sprawdzenia
+             */
+            LangList.prototype.IsElementRelatedToPanel = function (element) {
+                var _a;
+                if (this.Wrapper.contains(element) || this.Wrapper === element)
+                    return true;
+                if (((_a = this.CurrentAnchor) === null || _a === void 0 ? void 0 : _a.contains(element)) || this.CurrentAnchor === element)
+                    return true;
+                return false;
             };
             return LangList;
         }());
@@ -174,6 +223,7 @@ var Msz2001;
         /** Klasa zarządzająca zawartością listy języków */
         var LangListView = /** @class */ (function () {
             function LangListView(wrapper) {
+                var _this = this;
                 var header = document.createElement('header');
                 header.textContent = 'Dostępne języki';
                 wrapper.appendChild(header);
@@ -197,7 +247,20 @@ var Msz2001;
                 this.WikidataLink = document.createElement('a');
                 this.WikidataLink.textContent = 'elementu Wikidanych';
                 this.WikidataLink.href = 'https://wikidata.org';
+                this.WikidataLink.addEventListener('keydown', (function (e) {
+                    // Po naciśnięciu klawisza Tab, przejdź do pierwszego linku
+                    if (e.code == 'Tab' && !e.shiftKey) {
+                        _this.FocusFirstLink();
+                        e.preventDefault();
+                    }
+                }).bind(this));
                 footer.appendChild(this.WikidataLink);
+                wrapper.addEventListener('keydown', (function (e) {
+                    // Po naciśnięciu klawisza Shift+Tab, przejdź do ostatniego linku
+                    if (e.code == 'Tab' && e.shiftKey) {
+                        _this.MoveFocusToEndIfNeeded(e);
+                    }
+                }).bind(this));
                 this.PrepareForNextDisplay();
             }
             /**
@@ -212,7 +275,7 @@ var Msz2001;
              * @param sitelinks Tablica linków do innych wersji językowych
              */
             LangListView.prototype.PopulateLanguagesList = function (sitelinks) {
-                var e_2, _a;
+                var e_3, _a;
                 this.LanguagesList.innerText = '';
                 var processed_links = this.SortAndFilterLinks(sitelinks);
                 var hidden_li = [];
@@ -244,12 +307,12 @@ var Msz2001;
                         }
                     }
                 }
-                catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                catch (e_3_1) { e_3 = { error: e_3_1 }; }
                 finally {
                     try {
                         if (processed_links_1_1 && !processed_links_1_1.done && (_a = processed_links_1.return)) _a.call(processed_links_1);
                     }
-                    finally { if (e_2) throw e_2.error; }
+                    finally { if (e_3) throw e_3.error; }
                 }
                 // Dodaj link "pokaż wszystkie"
                 if (hidden_li.length > 0) {
@@ -261,19 +324,19 @@ var Msz2001;
                     li_1.appendChild(document.createTextNode(" (" + hidden_li.length + " ukrytych)"));
                     this.LanguagesList.appendChild(li_1);
                     a.addEventListener('click', function () {
-                        var e_3, _a;
+                        var e_4, _a;
                         try {
                             for (var hidden_li_1 = __values(hidden_li), hidden_li_1_1 = hidden_li_1.next(); !hidden_li_1_1.done; hidden_li_1_1 = hidden_li_1.next()) {
                                 var elem = hidden_li_1_1.value;
                                 elem.style.display = '';
                             }
                         }
-                        catch (e_3_1) { e_3 = { error: e_3_1 }; }
+                        catch (e_4_1) { e_4 = { error: e_4_1 }; }
                         finally {
                             try {
                                 if (hidden_li_1_1 && !hidden_li_1_1.done && (_a = hidden_li_1.return)) _a.call(hidden_li_1);
                             }
-                            finally { if (e_3) throw e_3.error; }
+                            finally { if (e_4) throw e_4.error; }
                         }
                         li_1.remove();
                     });
@@ -304,6 +367,61 @@ var Msz2001;
                 this.Loading.style.display = 'none';
                 this.LoadingError.style.display = '';
             };
+            /** Ustawia fokus na pierwszy link na liście */
+            LangListView.prototype.FocusFirstLink = function () {
+                var e_5, _a, e_6, _b;
+                try {
+                    for (var _c = __values(this.LanguagesList.children), _d = _c.next(); !_d.done; _d = _c.next()) {
+                        var li = _d.value;
+                        if (!(li instanceof HTMLElement))
+                            continue;
+                        if (li.style.display == 'none')
+                            continue;
+                        try {
+                            for (var _e = (e_6 = void 0, __values(li.children)), _f = _e.next(); !_f.done; _f = _e.next()) {
+                                var child = _f.value;
+                                if (child instanceof HTMLAnchorElement) {
+                                    child.focus();
+                                    return;
+                                }
+                            }
+                        }
+                        catch (e_6_1) { e_6 = { error: e_6_1 }; }
+                        finally {
+                            try {
+                                if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+                            }
+                            finally { if (e_6) throw e_6.error; }
+                        }
+                    }
+                }
+                catch (e_5_1) { e_5 = { error: e_5_1 }; }
+                finally {
+                    try {
+                        if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+                    }
+                    finally { if (e_5) throw e_5.error; }
+                }
+                this.WikidataLink.focus();
+            };
+            /**
+             * Jeśli ostatnio sfokusowany był pierwszy link na liście, przenosi fokus na ostatni
+             * @param e Zdarzenie naciśnięcia klawisza. Zostaje anulowane, by przeglądarka nie przenosiła fokusu
+             */
+            LangListView.prototype.MoveFocusToEndIfNeeded = function (e) {
+                var _a, _b;
+                if (!this.LanguagesList.contains(document.activeElement))
+                    return;
+                var li = (_b = (_a = document.activeElement) === null || _a === void 0 ? void 0 : _a.parentElement) === null || _b === void 0 ? void 0 : _b.previousElementSibling;
+                while (li !== null && li !== undefined) {
+                    // Jeśli poprzednik <li> jest widoczny, nic nie rób
+                    if (li.style.display != 'none')
+                        return;
+                    li = li.previousElementSibling;
+                }
+                this.WikidataLink.focus();
+                e === null || e === void 0 ? void 0 : e.preventDefault();
+            };
             /**
              * Tworzy adres URL odpowiadający linkowi
              * @param sitelink Obiekt, reprezentujący link do projektu Wikimedia
@@ -327,7 +445,7 @@ var Msz2001;
              * @param sitelinks Tablica linków do innych języków
              */
             LangListView.prototype.SortAndFilterLinks = function (sitelinks) {
-                var e_4, _a;
+                var e_7, _a;
                 var _b, _c;
                 //@ts-ignore - mw.uls nie istnieje w definicjach :(
                 var recommended_langs = new Set((_c = (_b = mw === null || mw === void 0 ? void 0 : mw.uls) === null || _b === void 0 ? void 0 : _b.getFrequentLanguageList()) !== null && _c !== void 0 ? _c : []);
@@ -370,12 +488,12 @@ var Msz2001;
                         }
                     }
                 }
-                catch (e_4_1) { e_4 = { error: e_4_1 }; }
+                catch (e_7_1) { e_7 = { error: e_7_1 }; }
                 finally {
                     try {
                         if (sitelinks_1_1 && !sitelinks_1_1.done && (_a = sitelinks_1.return)) _a.call(sitelinks_1);
                     }
-                    finally { if (e_4) throw e_4.error; }
+                    finally { if (e_7) throw e_7.error; }
                 }
                 return processed_anm.concat(processed_lnm, processed_da, processed_nobadge);
             };
@@ -486,18 +604,19 @@ var Msz2001;
     })(InterwikiLanglist = Msz2001.InterwikiLanglist || (Msz2001.InterwikiLanglist = {}));
 })(Msz2001 || (Msz2001 = {}));
 $(function () {
-    var e_5, _a;
+    var e_8, _a;
     // Wyszukaj interwiki do Wikidanych
     var wd_links = document.querySelectorAll('.link-interwiki-wd');
     var langlist = new Msz2001.InterwikiLanglist.LangList();
     var _loop_1 = function (wd_link) {
-        var e_6, _b;
+        var e_9, _b;
         if (!(wd_link instanceof HTMLElement))
             return "continue";
         // Znajdź link i wyciągnij z niego identyfikator elementu
         var q_id = '';
+        var inner_link = void 0;
         try {
-            for (var _c = (e_6 = void 0, __values(wd_link.children)), _d = _c.next(); !_d.done; _d = _c.next()) {
+            for (var _c = (e_9 = void 0, __values(wd_link.children)), _d = _c.next(); !_d.done; _d = _c.next()) {
                 var child = _d.value;
                 if (!(child instanceof HTMLAnchorElement))
                     continue;
@@ -512,23 +631,27 @@ $(function () {
                 child.style.textDecoration = 'none';
                 child.style.fontSize = '0.8em';
                 child.textContent = '字';
+                inner_link = child;
+                break;
             }
         }
-        catch (e_6_1) { e_6 = { error: e_6_1 }; }
+        catch (e_9_1) { e_9 = { error: e_9_1 }; }
         finally {
             try {
                 if (_d && !_d.done && (_b = _c.return)) _b.call(_c);
             }
-            finally { if (e_6) throw e_6.error; }
+            finally { if (e_9) throw e_9.error; }
         }
-        // Po najechaniu ikonki "Wikidane", pokaż panel z językami
-        wd_link.addEventListener('mouseenter', function () {
+        var display_langlist = function (reason) {
             if (langlist.IsVisible)
                 return;
             var sitelinks = Msz2001.InterwikiLanglist.WikidataClient.GetSitelinks(q_id);
             langlist.Populate(q_id, sitelinks);
-            langlist.Display(wd_link);
-        });
+            langlist.Display(wd_link, reason);
+        };
+        // Po najechaniu ikonki "Wikidane", pokaż panel z językami
+        wd_link.addEventListener('mouseenter', function () { return display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.MouseMove); });
+        inner_link === null || inner_link === void 0 ? void 0 : inner_link.addEventListener('click', function () { return display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.KeyPress); });
     };
     try {
         for (var wd_links_1 = __values(wd_links), wd_links_1_1 = wd_links_1.next(); !wd_links_1_1.done; wd_links_1_1 = wd_links_1.next()) {
@@ -536,21 +659,28 @@ $(function () {
             _loop_1(wd_link);
         }
     }
-    catch (e_5_1) { e_5 = { error: e_5_1 }; }
+    catch (e_8_1) { e_8 = { error: e_8_1 }; }
     finally {
         try {
             if (wd_links_1_1 && !wd_links_1_1.done && (_a = wd_links_1.return)) _a.call(wd_links_1);
         }
-        finally { if (e_5) throw e_5.error; }
+        finally { if (e_8) throw e_8.error; }
     }
     if (wd_links.length > 0) {
         // Służy do ukrywania selektora języków
         document.addEventListener('mousemove', function (ev) {
+            if (!langlist.IsVisible)
+                return;
             var selector_rect = langlist.GetBoundingClientRect();
             var is_out_X = ev.clientX < selector_rect.left || ev.clientX > selector_rect.right;
             var is_out_Y = ev.clientY < selector_rect.top || ev.clientY > selector_rect.bottom;
             if (is_out_X || is_out_Y)
-                langlist.Hide();
+                langlist.Hide(Msz2001.InterwikiLanglist.VisibilityChangeReason.MouseMove);
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.code != 'Escape')
+                return;
+            langlist.Hide(Msz2001.InterwikiLanglist.VisibilityChangeReason.KeyPress);
         });
         // Jeśli za blisko jednej z krawędzi, przesuń się
         var scrolling_1 = false;
@@ -563,6 +693,16 @@ $(function () {
                 });
             }
             scrolling_1 = true;
+        });
+        // Kliknięcie poza listą języków ukrywa ją
+        window.addEventListener('click', function (e) {
+            if (!langlist.IsVisible)
+                return;
+            if (!(e.target instanceof HTMLElement))
+                return;
+            if (langlist.IsElementRelatedToPanel(e.target))
+                return;
+            langlist.Hide(Msz2001.InterwikiLanglist.VisibilityChangeReason.KeyPress);
         });
     }
 });

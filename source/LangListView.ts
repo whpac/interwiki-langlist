@@ -46,7 +46,21 @@ namespace Msz2001.InterwikiLanglist {
             this.WikidataLink = document.createElement('a');
             this.WikidataLink.textContent = 'elementu Wikidanych';
             this.WikidataLink.href = 'https://wikidata.org';
+            this.WikidataLink.addEventListener('keydown', ((e: KeyboardEvent) => {
+                // Po naciśnięciu klawisza Tab, przejdź do pierwszego linku
+                if(e.code == 'Tab' && !e.shiftKey) {
+                    this.FocusFirstLink();
+                    e.preventDefault();
+                }
+            }).bind(this));
             footer.appendChild(this.WikidataLink);
+
+            wrapper.addEventListener('keydown', ((e: KeyboardEvent) => {
+                // Po naciśnięciu klawisza Shift+Tab, przejdź do ostatniego linku
+                if(e.code == 'Tab' && e.shiftKey) {
+                    this.MoveFocusToEndIfNeeded(e);
+                }
+            }).bind(this));
 
             this.PrepareForNextDisplay();
         }
@@ -141,6 +155,40 @@ namespace Msz2001.InterwikiLanglist {
         public DisplayLoadingError() {
             this.Loading.style.display = 'none';
             this.LoadingError.style.display = '';
+        }
+
+        /** Ustawia fokus na pierwszy link na liście */
+        public FocusFirstLink() {
+            for(let li of this.LanguagesList.children) {
+                if(!(li instanceof HTMLElement)) continue;
+                if(li.style.display == 'none') continue;
+
+                for(let child of li.children) {
+                    if(child instanceof HTMLAnchorElement) {
+                        child.focus();
+                        return;
+                    }
+                }
+            }
+            this.WikidataLink.focus();
+        }
+
+        /**
+         * Jeśli ostatnio sfokusowany był pierwszy link na liście, przenosi fokus na ostatni
+         * @param e Zdarzenie naciśnięcia klawisza. Zostaje anulowane, by przeglądarka nie przenosiła fokusu
+         */
+        protected MoveFocusToEndIfNeeded(e?: KeyboardEvent) {
+            if(!this.LanguagesList.contains(document.activeElement)) return;
+            let li = document.activeElement?.parentElement?.previousElementSibling as (HTMLElement | null | undefined);
+
+            while(li !== null && li !== undefined) {
+                // Jeśli poprzednik <li> jest widoczny, nic nie rób
+                if(li.style.display != 'none') return;
+                li = li.previousElementSibling as (HTMLElement | null);
+            }
+
+            this.WikidataLink.focus();
+            e?.preventDefault();
         }
 
         /**
