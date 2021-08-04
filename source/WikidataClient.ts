@@ -53,7 +53,7 @@ namespace Msz2001.InterwikiLanglist {
                     }
                 });
                 xhr.addEventListener('error', () => reject());
-                xhr.open('GET', `https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=${q_id}&origin=https%3A%2F%2Fpl.wikipedia.org&props=sitelinks`, true);
+                xhr.open('GET', `https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=${q_id}&origin=https%3A%2F%2F${window.location.hostname}&props=sitelinks`, true);
                 xhr.send();
             });
         }
