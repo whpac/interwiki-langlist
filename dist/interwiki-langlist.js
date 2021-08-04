@@ -323,7 +323,7 @@ var Msz2001;
                     li_1.appendChild(a);
                     li_1.appendChild(document.createTextNode(" (" + hidden_li.length + " ukrytych)"));
                     this.LanguagesList.appendChild(li_1);
-                    a.addEventListener('click', function () {
+                    a.addEventListener('click', function (e) {
                         var e_4, _a;
                         try {
                             for (var hidden_li_1 = __values(hidden_li), hidden_li_1_1 = hidden_li_1.next(); !hidden_li_1_1.done; hidden_li_1_1 = hidden_li_1.next()) {
@@ -339,6 +339,7 @@ var Msz2001;
                             finally { if (e_4) throw e_4.error; }
                         }
                         li_1.remove();
+                        e.stopPropagation(); // Dzięki temu kliknięcie nie ukrywa panelu
                     });
                 }
                 if (processed_links.length == 0) {

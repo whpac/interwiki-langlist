@@ -120,11 +120,12 @@ namespace Msz2001.InterwikiLanglist {
                 li.appendChild(document.createTextNode(` (${hidden_li.length} ukrytych)`));
                 this.LanguagesList.appendChild(li);
 
-                a.addEventListener('click', () => {
+                a.addEventListener('click', (e) => {
                     for(let elem of hidden_li) {
                         elem.style.display = '';
                     }
                     li.remove();
+                    e.stopPropagation();    // Dzięki temu kliknięcie nie ukrywa panelu
                 });
             }
 
