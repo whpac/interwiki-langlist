@@ -33,7 +33,7 @@ $(() => {
         };
 
         // Po najechaniu ikonki "Wikidane", pokaż panel z językami - w wersji mobilnej dopiero po kliknięciu
-        if(document.body.classList.contains('skin-minerva')) {
+        if(!document.body.classList.contains('skin-minerva')) {
             wd_link.addEventListener('mouseenter', () => display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.MouseMove));
         }
         inner_link?.addEventListener('click', () => display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.KeyPress));
