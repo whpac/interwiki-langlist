@@ -126,7 +126,7 @@ var Msz2001;
             "fa": "perski",
             "ff": "ful",
             "fi": "fiński",
-            "fiu-vro": "võro",
+            "fiu_vro": "võro",
             "fj": "fidżyjski",
             "fo": "farerski",
             "fr": "francuski",
@@ -374,10 +374,12 @@ var Msz2001;
                 /** Czy panel został automatycznie sfokusowany */
                 this.AutoFocused = false;
                 this.CurrentAnchor = null;
+                this.Backdrop = document.createElement('div');
+                this.Backdrop.classList.add('interwiki-langlist-backdrop');
+                document.body.appendChild(this.Backdrop);
                 this.Wrapper = document.createElement('div');
-                this.Wrapper.style.display = 'none';
                 this.Wrapper.classList.add('interwiki-langlist-wrapper');
-                document.body.appendChild(this.Wrapper);
+                document.body.insertBefore(this.Wrapper, this.Backdrop);
                 this.View = new InterwikiLanglist.LangListView(this.Wrapper);
                 window.addEventListener('resize', this.RepositionSelf.bind(this));
             }
@@ -427,10 +429,13 @@ var Msz2001;
              * @param anchor Ikonka "Wikidane", do której należy przypiąć panel
              */
             LangList.prototype.Display = function (anchor, reason) {
+                var _this = this;
                 this.CurrentAnchor = anchor;
                 this.AutoFocused = reason == VisibilityChangeReason.KeyPress;
-                this.Wrapper.style.display = 'block';
-                this.RepositionSelf();
+                window.requestAnimationFrame(function () {
+                    _this.Wrapper.classList.add('shown');
+                    _this.RepositionSelf();
+                });
             };
             /**
              * Ukrywa selektor języków
@@ -463,7 +468,7 @@ var Msz2001;
                     this.CurrentAnchor.focus();
                 }
                 this.CurrentAnchor = null;
-                this.Wrapper.style.display = 'none';
+                this.Wrapper.classList.remove('shown');
                 this.View.PrepareForNextDisplay();
             };
             /**
@@ -943,9 +948,6 @@ $(function () {
                 // Wyłącz link do Wikidanych i zastąp ikonkę bardziej czytelnym symbolem
                 child.href = 'javascript:void(0)';
                 child.title = 'Zobacz, w jakich językach ten artykuł istnieje';
-                child.style.cursor = 'default';
-                child.style.textDecoration = 'none';
-                child.style.fontSize = '0.8em';
                 child.innerHTML = '<img src="//upload.wikimedia.org/wikipedia/commons/4/45/Translate_link_color_crop.svg" alt="[w innych językach]" width="12" />';
                 inner_link = child;
                 break;
@@ -965,8 +967,10 @@ $(function () {
             langlist.Populate(q_id, sitelinks);
             langlist.Display(wd_link, reason);
         };
-        // Po najechaniu ikonki "Wikidane", pokaż panel z językami
-        wd_link.addEventListener('mouseenter', function () { return display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.MouseMove); });
+        // Po najechaniu ikonki "Wikidane", pokaż panel z językami - w wersji mobilnej dopiero po kliknięciu
+        if (!document.body.classList.contains('skin-minerva')) {
+            wd_link.addEventListener('mouseenter', function () { return display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.MouseMove); });
+        }
         inner_link === null || inner_link === void 0 ? void 0 : inner_link.addEventListener('click', function () { return display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.KeyPress); });
     };
     try {
