@@ -22,7 +22,7 @@ $(() => {
             child.style.cursor = 'default';
             child.style.textDecoration = 'none';
             child.style.fontSize = '0.8em';
-            child.textContent = '字';
+            child.innerHTML = '<img src="//upload.wikimedia.org/wikipedia/commons/4/45/Translate_link_color_crop.svg" alt="[w innych językach]" width="12" />';
             inner_link = child;
             break;
         }
