@@ -19,9 +19,6 @@ $(() => {
             // Wyłącz link do Wikidanych i zastąp ikonkę bardziej czytelnym symbolem
             child.href = 'javascript:void(0)';
             child.title = 'Zobacz, w jakich językach ten artykuł istnieje';
-            child.style.cursor = 'default';
-            child.style.textDecoration = 'none';
-            child.style.fontSize = '0.8em';
             child.innerHTML = '<img src="//upload.wikimedia.org/wikipedia/commons/4/45/Translate_link_color_crop.svg" alt="[w innych językach]" width="12" />';
             inner_link = child;
             break;
@@ -35,8 +32,10 @@ $(() => {
             langlist.Display(wd_link as HTMLElement, reason);
         };
 
-        // Po najechaniu ikonki "Wikidane", pokaż panel z językami
-        wd_link.addEventListener('mouseenter', () => display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.MouseMove));
+        // Po najechaniu ikonki "Wikidane", pokaż panel z językami - w wersji mobilnej dopiero po kliknięciu
+        if(document.body.classList.contains('skin-minerva')) {
+            wd_link.addEventListener('mouseenter', () => display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.MouseMove));
+        }
         inner_link?.addEventListener('click', () => display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.KeyPress));
     }
 
