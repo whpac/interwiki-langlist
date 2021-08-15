@@ -202,15 +202,6 @@ namespace Msz2001.InterwikiLanglist {
         }
 
         /**
-         * Zwraca wyświetlaną nazwę języka, w którym jest treść pod linkiem
-         * @param sitelink Obiekt, reprezentujący link do projektu Wikimedia
-         */
-        protected GetLanguageDisplayName(sitelink: Sitelink) {
-            //@ts-ignore - $.uls nie istnieje w definicjach :(
-            return $?.uls?.data?.getAutonym(sitelink.LanguageCode) ?? sitelink.LanguageCode;
-        }
-
-        /**
          * Odfiltrowuje linki do innych projektów niż Wikipedia. Sortuje je
          * według odznaczeń oraz preferencji użytkownika, odczytanych z ULS
          * @param sitelinks Tablica linków do innych języków
@@ -236,7 +227,7 @@ namespace Msz2001.InterwikiLanglist {
                 let processed_link: ProcessedSitelink = {
                     Title: sitelink.Title,
                     LanguageCode: sitelink.LanguageCode,
-                    LanguageName: this.GetLanguageDisplayName(sitelink),
+                    LanguageName: GetLanguageName(sitelink.LanguageCode),
                     IsRecommended: recommended_langs.has(sitelink.LanguageCode),
                     Badge: sitelink.Badge
                 };
@@ -248,6 +239,18 @@ namespace Msz2001.InterwikiLanglist {
                     default: processed_nobadge.push(processed_link); break;
                 }
             }
+
+            let sitelink_comparer = (a: ProcessedSitelink, b: ProcessedSitelink) => {
+                if(a.LanguageName < b.LanguageName) return -1;
+                if(a.LanguageName > b.LanguageName) return 1;
+                return 0;
+            };
+
+            /* Posortuj alfabetycznie języki */
+            processed_anm.sort(sitelink_comparer);
+            processed_lnm.sort(sitelink_comparer);
+            processed_da.sort(sitelink_comparer);
+            processed_nobadge.sort(sitelink_comparer);
 
             return processed_anm.concat(processed_lnm, processed_da, processed_nobadge);
         }
