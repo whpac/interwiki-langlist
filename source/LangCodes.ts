@@ -76,7 +76,7 @@ namespace Msz2001.InterwikiLanglist {
         "fa": "perski",
         "ff": "ful",
         "fi": "fiński",
-        "fiu-vro": "võro",
+        "fiu_vro": "võro",
         "fj": "fidżyjski",
         "fo": "farerski",
         "fr": "francuski",
