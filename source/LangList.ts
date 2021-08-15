@@ -9,6 +9,8 @@ namespace Msz2001.InterwikiLanglist {
     export class LangList {
         /** Ramka, zawierająca listę języków */
         protected Wrapper: HTMLElement;
+        /** Element zaciemniający stronę */
+        protected Backdrop: HTMLElement;
         /** Widok dla listy */
         protected View: LangListView;
         /** Czy panel został automatycznie sfokusowany */
@@ -25,10 +27,13 @@ namespace Msz2001.InterwikiLanglist {
         public constructor() {
             this.CurrentAnchor = null;
 
+            this.Backdrop = document.createElement('div');
+            this.Backdrop.classList.add('interwiki-langlist-backdrop');
+            document.body.appendChild(this.Backdrop);
+
             this.Wrapper = document.createElement('div');
-            this.Wrapper.style.display = 'none';
             this.Wrapper.classList.add('interwiki-langlist-wrapper');
-            document.body.appendChild(this.Wrapper);
+            document.body.insertBefore(this.Wrapper, this.Backdrop);
 
             this.View = new LangListView(this.Wrapper);
 
@@ -59,8 +64,10 @@ namespace Msz2001.InterwikiLanglist {
             this.CurrentAnchor = anchor;
             this.AutoFocused = reason == VisibilityChangeReason.KeyPress;
 
-            this.Wrapper.style.display = 'block';
-            this.RepositionSelf();
+            window.requestAnimationFrame(() => {
+                this.Wrapper.classList.add('shown');
+                this.RepositionSelf();
+            });
         }
 
         /**
@@ -84,7 +91,7 @@ namespace Msz2001.InterwikiLanglist {
             }
 
             this.CurrentAnchor = null;
-            this.Wrapper.style.display = 'none';
+            this.Wrapper.classList.remove('shown');
             this.View.PrepareForNextDisplay();
         }
 
