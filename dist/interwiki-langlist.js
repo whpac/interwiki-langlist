@@ -74,10 +74,10 @@ var Msz2001;
             "ba": "baszkirski",
             "ban": "balijski",
             "bar": "bawarski",
-            "bat-smg": "żmudzki",
+            "bat_smg": "żmudzki",
             "bcl": "środkowy bikolski",
             "be": "białoruski",
-            "be-x-old": "białoruski (taraszkiewica)",
+            "be_x_old": "białoruski (taraszkiewica)",
             "bg": "bułgarski",
             "bh": "bihari",
             "bi": "bislama",
@@ -91,7 +91,7 @@ var Msz2001;
             "bug": "bugijski",
             "bxr": "buriacki",
             "ca": "kataloński",
-            "cbk-zam": "chavacano",
+            "cbk_zam": "chavacano",
             "cdo": "mindong",
             "ce": "czeczeński",
             "ceb": "cebuano",
@@ -210,7 +210,7 @@ var Msz2001;
             "lv": "łotewski",
             "mad": "madurski",
             "mai": "maithili",
-            "map-bms": "banjumasański",
+            "map_bms": "banjumasański",
             "mdf": "moksza",
             "mg": "malgaski",
             "mh": "marszalski",
@@ -234,7 +234,7 @@ var Msz2001;
             "nah": "nahuatl",
             "nap": "neapolitański",
             "nds": "dolnoniemiecki",
-            "nds-nl": "dolnoniemiecki (Holandia)",
+            "nds_nl": "dolnoniemiecki (Holandia)",
             "ne": "nepalski",
             "new": "newarski",
             "ng": "ndonga",
@@ -270,8 +270,8 @@ var Msz2001;
             "rmy": "romski",
             "rn": "rundi",
             "ro": "rumuński",
-            "roa-rup": "arumuński",
-            "roa-tara": "tarencki",
+            "roa_rup": "arumuński",
+            "roa_tara": "tarencki",
             "ru": "rosyjski",
             "rue": "rusiński",
             "rw": "ruanda",
@@ -342,9 +342,9 @@ var Msz2001;
             "za": "zhuang",
             "zea": "zelandzki",
             "zh": "chiński standardowy",
-            "zh-classical": "chiński klasyczny",
-            "zh-min-nan": "minnan",
-            "zh-yue": "kantoński",
+            "zh_classical": "chiński klasyczny",
+            "zh_min_nan": "minnan",
+            "zh_yue": "kantoński",
             "zu": "zulu"
         };
         /**
@@ -801,11 +801,10 @@ var Msz2001;
                     finally { if (e_7) throw e_7.error; }
                 }
                 var sitelink_comparer = function (a, b) {
-                    if (a.LanguageName < b.LanguageName)
-                        return -1;
-                    if (a.LanguageName > b.LanguageName)
-                        return 1;
-                    return 0;
+                    var locale = 'pl';
+                    var a_name = a.LanguageName.toLocaleLowerCase(locale);
+                    var b_name = b.LanguageName.toLocaleLowerCase(locale);
+                    return a_name.localeCompare(b_name, locale);
                 };
                 /* Posortuj alfabetycznie języki */
                 processed_anm.sort(sitelink_comparer);

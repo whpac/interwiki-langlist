@@ -241,9 +241,10 @@ namespace Msz2001.InterwikiLanglist {
             }
 
             let sitelink_comparer = (a: ProcessedSitelink, b: ProcessedSitelink) => {
-                if(a.LanguageName < b.LanguageName) return -1;
-                if(a.LanguageName > b.LanguageName) return 1;
-                return 0;
+                const locale = 'pl';
+                const a_name = a.LanguageName.toLocaleLowerCase(locale);
+                const b_name = b.LanguageName.toLocaleLowerCase(locale);
+                return a_name.localeCompare(b_name, locale);
             };
 
             /* Posortuj alfabetycznie języki */
