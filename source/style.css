@@ -92,6 +92,4 @@ html.enable-dark-skin .interwiki-langlist-wrapper li.badge-anm::after,
 html.enable-dark-skin .interwiki-langlist-wrapper li.badge-lnm::after {border-color:#e4c000;}
 html.enable-dark-skin .interwiki-langlist-wrapper li.badge-da::after {border-color:#888;}
 html.enable-dark-skin .link-interwiki-wd img {filter:invert(1) hue-rotate(180deg);}
-html.enable-dark-skin .interwiki-langlist-backdrop {
-    background:rgba(0,0,0,0.7);
-}
+html.enable-dark-skin .interwiki-langlist-backdrop {background:rgba(0,0,0,0.7);}
