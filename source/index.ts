@@ -24,19 +24,40 @@ $(() => {
             break;
         }
 
-        let display_langlist = (reason: Msz2001.InterwikiLanglist.VisibilityChangeReason) => {
+        let red_link: HTMLAnchorElement | undefined;
+        if(wd_link.previousElementSibling instanceof HTMLAnchorElement) {
+            red_link = wd_link.previousElementSibling;
+        }
+
+        let is_minerva = document.body.classList.contains('skin-minerva');
+        if(is_minerva && red_link !== undefined) {
+            // Utwórz nowy link, by usunąć procedury obsługi zdarzeń,
+            // m.in. odpowiadające za wyświetlenia okna proponującego stworzenie strony
+            let cloned_link = red_link.cloneNode(true) as HTMLAnchorElement;
+            red_link.parentElement?.insertBefore(cloned_link, red_link);
+            red_link.remove();
+            red_link = cloned_link;
+        }
+
+        let display_langlist = (reason: Msz2001.InterwikiLanglist.VisibilityChangeReason, e?: MouseEvent) => {
             if(langlist.IsVisible) return;
 
             let sitelinks = Msz2001.InterwikiLanglist.WikidataClient.GetSitelinks(q_id);
-            langlist.Populate(q_id, sitelinks);
-            langlist.Display(wd_link as HTMLElement, reason);
+            langlist.Populate(q_id, sitelinks, red_link?.href);
+            langlist.Display(wd_link as HTMLElement, reason, red_link);
+            e?.preventDefault();
         };
 
-        // Po najechaniu ikonki "Wikidane", pokaż panel z językami - w wersji mobilnej dopiero po kliknięciu
-        if(!document.body.classList.contains('skin-minerva')) {
+        // Kliknięcie ikonkę pokazuje panel języków
+        inner_link?.addEventListener('click', (e) => display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.KeyPress, e));
+
+        // Poza skórką Minerva, panel pokazuje się również po najechaniu na ikonkę
+        // W Minervie z kolei, można kliknąć również na czerwony link
+        if(!is_minerva) {
             wd_link.addEventListener('mouseenter', () => display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.MouseMove));
+        } else {
+            red_link?.addEventListener('click', (e) => display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.KeyPress, e));
         }
-        inner_link?.addEventListener('click', () => display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.KeyPress));
     }
 
     if(wd_links.length > 0) {

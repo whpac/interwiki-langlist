@@ -15,8 +15,21 @@ namespace Msz2001.InterwikiLanglist {
         protected NoLinks: HTMLElement;
         protected Loading: HTMLElement;
         protected LoadingError: HTMLElement;
+        protected CreateArticleWrapper: HTMLElement;
+        protected CreateButton: HTMLAnchorElement;
+        protected CreateArticleUrl: string | undefined;
 
         public constructor(wrapper: HTMLElement) {
+            this.CreateArticleWrapper = document.createElement('div');
+            this.CreateArticleWrapper.classList.add('create-wrapper');
+            this.CreateArticleWrapper.textContent = 'Tego artykułu nie ma jeszcze w polskojęzycznej Wikipedii. Możesz go utworzyć.';
+            wrapper.appendChild(this.CreateArticleWrapper);
+
+            this.CreateButton = document.createElement('a');
+            this.CreateButton.classList.add('mw-ui-button', 'mw-ui-progressive');
+            this.CreateButton.textContent = 'Utwórz stronę';
+            this.CreateArticleWrapper.appendChild(this.CreateButton);
+
             let header = document.createElement('header');
             header.textContent = 'Dostępne języki';
             wrapper.appendChild(header);
@@ -71,6 +84,20 @@ namespace Msz2001.InterwikiLanglist {
          */
         public SetWikidataElement(q_id: string) {
             this.WikidataLink.href = `https://www.wikidata.org/wiki/Special:EntityData/${q_id}`;
+        }
+
+        /**
+         * Ustawia adres docelowy przycisku "Utwórz stronę"
+         * @param url Adres URL, prowadzący do strony tworzenia artykułu
+         */
+        public SetCreateUrl(url: string | undefined) {
+            this.CreateButton.href = url ?? '#';
+
+            if(url === undefined) {
+                this.CreateArticleWrapper.style.display = 'none';
+            } else {
+                this.CreateArticleWrapper.style.display = '';
+            }
         }
 
         /**
@@ -160,6 +187,13 @@ namespace Msz2001.InterwikiLanglist {
 
         /** Ustawia fokus na pierwszy link na liście */
         public FocusFirstLink() {
+            // Jeśli przycisk "Utwórz stronę" jest widoczny, ustaw na niego fokus
+            let create_style = window.getComputedStyle(this.CreateArticleWrapper);
+            if(create_style.getPropertyValue('display') != 'none') {
+                this.CreateButton.focus();
+                return;
+            }
+
             for(let li of this.LanguagesList.children) {
                 if(!(li instanceof HTMLElement)) continue;
                 if(li.style.display == 'none') continue;
@@ -179,6 +213,18 @@ namespace Msz2001.InterwikiLanglist {
          * @param e Zdarzenie naciśnięcia klawisza. Zostaje anulowane, by przeglądarka nie przenosiła fokusu
          */
         protected MoveFocusToEndIfNeeded(e?: KeyboardEvent) {
+            // Jeśli przycisk "Utwórz stronę" jest widoczny, sprawdź czy ma fokus
+            let create_style = window.getComputedStyle(this.CreateArticleWrapper);
+            if(create_style.getPropertyValue('display') != 'none') {
+                // Jeśli "Utwórz stronę" jest aktywny, ustaw fokus na koniec
+                if(document.activeElement == this.CreateButton) {
+                    this.WikidataLink.focus();
+                    e?.preventDefault();
+                } else {
+                    return;
+                }
+            }
+
             if(!this.LanguagesList.contains(document.activeElement)) return;
             let li = document.activeElement?.parentElement?.previousElementSibling as (HTMLElement | null | undefined);
 

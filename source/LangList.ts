@@ -18,6 +18,8 @@ namespace Msz2001.InterwikiLanglist {
 
         /** Element, do którego aktualnie jest zakotwiczona lista języków */
         protected CurrentAnchor: HTMLElement | null;
+        /** Czerwony link, powiązany z elementem */
+        protected CurrentRedLink: HTMLAnchorElement | null;
 
         /** Czy panel jest widoczny */
         public get IsVisible() {
@@ -26,6 +28,7 @@ namespace Msz2001.InterwikiLanglist {
 
         public constructor() {
             this.CurrentAnchor = null;
+            this.CurrentRedLink = null;
 
             this.Backdrop = document.createElement('div');
             this.Backdrop.classList.add('interwiki-langlist-backdrop');
@@ -44,9 +47,12 @@ namespace Msz2001.InterwikiLanglist {
          * Wypełnia listę języków
          * @param q_id Identyfikator w Wikidanych
          * @param languages Lista nazw w innych językach
+         * @param create_url Link do utworzenia artykułu
          */
-        public async Populate(q_id: string, languages: Promise<Sitelink[]>) {
+        public async Populate(q_id: string, languages: Promise<Sitelink[]>, create_url: string | undefined) {
             this.View.SetWikidataElement(q_id);
+            this.View.SetCreateUrl(create_url);
+
             try {
                 this.View.PopulateLanguagesList(await languages);
             } catch(e) {
@@ -59,10 +65,13 @@ namespace Msz2001.InterwikiLanglist {
         /**
          * Wyświetla selektor języków "przypięty" do danego linku
          * @param anchor Ikonka "Wikidane", do której należy przypiąć panel
+         * @param reason Dlaczego należy pokazać element
+         * @param red_link Czerwony link, powiązany z panelem
          */
-        public Display(anchor: HTMLElement, reason: VisibilityChangeReason) {
+        public Display(anchor: HTMLElement, reason: VisibilityChangeReason, red_link: HTMLAnchorElement | null = null) {
             this.CurrentAnchor = anchor;
             this.AutoFocused = reason == VisibilityChangeReason.KeyPress;
+            this.CurrentRedLink = red_link;
 
             window.requestAnimationFrame(() => {
                 this.Wrapper.classList.add('shown');
@@ -91,6 +100,7 @@ namespace Msz2001.InterwikiLanglist {
             }
 
             this.CurrentAnchor = null;
+            this.CurrentRedLink = null;
             this.Wrapper.classList.remove('shown');
             this.View.PrepareForNextDisplay();
         }
@@ -156,6 +166,7 @@ namespace Msz2001.InterwikiLanglist {
         public IsElementRelatedToPanel(element: HTMLElement) {
             if(this.Wrapper.contains(element) || this.Wrapper === element) return true;
             if(this.CurrentAnchor?.contains(element) || this.CurrentAnchor === element) return true;
+            if(this.CurrentRedLink?.contains(element) || this.CurrentRedLink === element) return true;
             return false;
         }
     }
