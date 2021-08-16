@@ -374,6 +374,7 @@ var Msz2001;
                 /** Czy panel został automatycznie sfokusowany */
                 this.AutoFocused = false;
                 this.CurrentAnchor = null;
+                this.CurrentRedLink = null;
                 this.Backdrop = document.createElement('div');
                 this.Backdrop.classList.add('interwiki-langlist-backdrop');
                 document.body.appendChild(this.Backdrop);
@@ -395,14 +396,16 @@ var Msz2001;
              * Wypełnia listę języków
              * @param q_id Identyfikator w Wikidanych
              * @param languages Lista nazw w innych językach
+             * @param create_url Link do utworzenia artykułu
              */
-            LangList.prototype.Populate = function (q_id, languages) {
+            LangList.prototype.Populate = function (q_id, languages, create_url) {
                 return __awaiter(this, void 0, void 0, function () {
                     var _a, _b, e_1;
                     return __generator(this, function (_c) {
                         switch (_c.label) {
                             case 0:
                                 this.View.SetWikidataElement(q_id);
+                                this.View.SetCreateUrl(create_url);
                                 _c.label = 1;
                             case 1:
                                 _c.trys.push([1, 3, , 4]);
@@ -427,11 +430,15 @@ var Msz2001;
             /**
              * Wyświetla selektor języków "przypięty" do danego linku
              * @param anchor Ikonka "Wikidane", do której należy przypiąć panel
+             * @param reason Dlaczego należy pokazać element
+             * @param red_link Czerwony link, powiązany z panelem
              */
-            LangList.prototype.Display = function (anchor, reason) {
+            LangList.prototype.Display = function (anchor, reason, red_link) {
                 var _this = this;
+                if (red_link === void 0) { red_link = null; }
                 this.CurrentAnchor = anchor;
                 this.AutoFocused = reason == VisibilityChangeReason.KeyPress;
+                this.CurrentRedLink = red_link;
                 window.requestAnimationFrame(function () {
                     _this.Wrapper.classList.add('shown');
                     _this.RepositionSelf();
@@ -468,6 +475,7 @@ var Msz2001;
                     this.CurrentAnchor.focus();
                 }
                 this.CurrentAnchor = null;
+                this.CurrentRedLink = null;
                 this.Wrapper.classList.remove('shown');
                 this.View.PrepareForNextDisplay();
             };
@@ -522,10 +530,12 @@ var Msz2001;
              * @param element Element do sprawdzenia
              */
             LangList.prototype.IsElementRelatedToPanel = function (element) {
-                var _a;
+                var _a, _b;
                 if (this.Wrapper.contains(element) || this.Wrapper === element)
                     return true;
                 if (((_a = this.CurrentAnchor) === null || _a === void 0 ? void 0 : _a.contains(element)) || this.CurrentAnchor === element)
+                    return true;
+                if (((_b = this.CurrentRedLink) === null || _b === void 0 ? void 0 : _b.contains(element)) || this.CurrentRedLink === element)
                     return true;
                 return false;
             };
@@ -542,6 +552,14 @@ var Msz2001;
         var LangListView = /** @class */ (function () {
             function LangListView(wrapper) {
                 var _this = this;
+                this.CreateArticleWrapper = document.createElement('div');
+                this.CreateArticleWrapper.classList.add('create-wrapper');
+                this.CreateArticleWrapper.textContent = 'Tego artykułu nie ma jeszcze w polskojęzycznej Wikipedii. Możesz go utworzyć.';
+                wrapper.appendChild(this.CreateArticleWrapper);
+                this.CreateButton = document.createElement('a');
+                this.CreateButton.classList.add('mw-ui-button', 'mw-ui-progressive');
+                this.CreateButton.textContent = 'Utwórz stronę';
+                this.CreateArticleWrapper.appendChild(this.CreateButton);
                 var header = document.createElement('header');
                 header.textContent = 'Dostępne języki';
                 wrapper.appendChild(header);
@@ -587,6 +605,19 @@ var Msz2001;
              */
             LangListView.prototype.SetWikidataElement = function (q_id) {
                 this.WikidataLink.href = "https://www.wikidata.org/wiki/Special:EntityData/" + q_id;
+            };
+            /**
+             * Ustawia adres docelowy przycisku "Utwórz stronę"
+             * @param url Adres URL, prowadzący do strony tworzenia artykułu
+             */
+            LangListView.prototype.SetCreateUrl = function (url) {
+                this.CreateButton.href = url !== null && url !== void 0 ? url : '#';
+                if (url === undefined) {
+                    this.CreateArticleWrapper.style.display = 'none';
+                }
+                else {
+                    this.CreateArticleWrapper.style.display = '';
+                }
             };
             /**
              * Wypełnia listę linków do wersji językowych
@@ -689,6 +720,12 @@ var Msz2001;
             /** Ustawia fokus na pierwszy link na liście */
             LangListView.prototype.FocusFirstLink = function () {
                 var e_5, _a, e_6, _b;
+                // Jeśli przycisk "Utwórz stronę" jest widoczny, ustaw na niego fokus
+                var create_style = window.getComputedStyle(this.CreateArticleWrapper);
+                if (create_style.getPropertyValue('display') != 'none') {
+                    this.CreateButton.focus();
+                    return;
+                }
                 try {
                     for (var _c = __values(this.LanguagesList.children), _d = _c.next(); !_d.done; _d = _c.next()) {
                         var li = _d.value;
@@ -729,6 +766,18 @@ var Msz2001;
              */
             LangListView.prototype.MoveFocusToEndIfNeeded = function (e) {
                 var _a, _b;
+                // Jeśli przycisk "Utwórz stronę" jest widoczny, sprawdź czy ma fokus
+                var create_style = window.getComputedStyle(this.CreateArticleWrapper);
+                if (create_style.getPropertyValue('display') != 'none') {
+                    // Jeśli "Utwórz stronę" jest aktywny, ustaw fokus na koniec
+                    if (document.activeElement == this.CreateButton) {
+                        this.WikidataLink.focus();
+                        e === null || e === void 0 ? void 0 : e.preventDefault();
+                    }
+                    else {
+                        return;
+                    }
+                }
                 if (!this.LanguagesList.contains(document.activeElement))
                     return;
                 var li = (_b = (_a = document.activeElement) === null || _a === void 0 ? void 0 : _a.parentElement) === null || _b === void 0 ? void 0 : _b.previousElementSibling;
@@ -926,19 +975,20 @@ var Msz2001;
 })(Msz2001 || (Msz2001 = {}));
 $(function () {
     var e_8, _a;
+    var _b;
     // Wyszukaj interwiki do Wikidanych
     var wd_links = document.querySelectorAll('.link-interwiki-wd');
     var langlist = new Msz2001.InterwikiLanglist.LangList();
     var _loop_1 = function (wd_link) {
-        var e_9, _b;
+        var e_9, _c;
         if (!(wd_link instanceof HTMLElement))
             return "continue";
         // Znajdź link i wyciągnij z niego identyfikator elementu
         var q_id = '';
         var inner_link = void 0;
         try {
-            for (var _c = (e_9 = void 0, __values(wd_link.children)), _d = _c.next(); !_d.done; _d = _c.next()) {
-                var child = _d.value;
+            for (var _d = (e_9 = void 0, __values(wd_link.children)), _e = _d.next(); !_e.done; _e = _d.next()) {
+                var child = _e.value;
                 if (!(child instanceof HTMLAnchorElement))
                     continue;
                 if (child.href.indexOf('wikidata.org') < 0)
@@ -956,22 +1006,41 @@ $(function () {
         catch (e_9_1) { e_9 = { error: e_9_1 }; }
         finally {
             try {
-                if (_d && !_d.done && (_b = _c.return)) _b.call(_c);
+                if (_e && !_e.done && (_c = _d.return)) _c.call(_d);
             }
             finally { if (e_9) throw e_9.error; }
         }
-        var display_langlist = function (reason) {
+        var red_link;
+        if (wd_link.previousElementSibling instanceof HTMLAnchorElement) {
+            red_link = wd_link.previousElementSibling;
+        }
+        var is_minerva = document.body.classList.contains('skin-minerva');
+        if (is_minerva && red_link !== undefined) {
+            // Utwórz nowy link, by usunąć procedury obsługi zdarzeń,
+            // m.in. odpowiadające za wyświetlenia okna proponującego stworzenie strony
+            var cloned_link = red_link.cloneNode(true);
+            (_b = red_link.parentElement) === null || _b === void 0 ? void 0 : _b.insertBefore(cloned_link, red_link);
+            red_link.remove();
+            red_link = cloned_link;
+        }
+        var display_langlist = function (reason, e) {
             if (langlist.IsVisible)
                 return;
             var sitelinks = Msz2001.InterwikiLanglist.WikidataClient.GetSitelinks(q_id);
-            langlist.Populate(q_id, sitelinks);
-            langlist.Display(wd_link, reason);
+            langlist.Populate(q_id, sitelinks, red_link === null || red_link === void 0 ? void 0 : red_link.href);
+            langlist.Display(wd_link, reason, red_link);
+            e === null || e === void 0 ? void 0 : e.preventDefault();
         };
-        // Po najechaniu ikonki "Wikidane", pokaż panel z językami - w wersji mobilnej dopiero po kliknięciu
-        if (!document.body.classList.contains('skin-minerva')) {
+        // Kliknięcie ikonkę pokazuje panel języków
+        inner_link === null || inner_link === void 0 ? void 0 : inner_link.addEventListener('click', function (e) { return display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.KeyPress, e); });
+        // Poza skórką Minerva, panel pokazuje się również po najechaniu na ikonkę
+        // W Minervie z kolei, można kliknąć również na czerwony link
+        if (!is_minerva) {
             wd_link.addEventListener('mouseenter', function () { return display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.MouseMove); });
         }
-        inner_link === null || inner_link === void 0 ? void 0 : inner_link.addEventListener('click', function () { return display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.KeyPress); });
+        else {
+            red_link === null || red_link === void 0 ? void 0 : red_link.addEventListener('click', function (e) { return display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.KeyPress, e); });
+        }
     };
     try {
         for (var wd_links_1 = __values(wd_links), wd_links_1_1 = wd_links_1.next(); !wd_links_1_1.done; wd_links_1_1 = wd_links_1.next()) {
