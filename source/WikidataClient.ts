@@ -14,46 +14,75 @@ namespace Msz2001.InterwikiLanglist {
         LnM
     }
 
+    export type WikidataResult = {
+        QId: string;
+        Sitelinks: Sitelink[];
+    };
+
+    export class ArticleId {
+        public static readonly WIKIDATA = 'wikidatawiki';
+
+        public constructor(
+            public WikiId: string,
+            public Title: string
+        ) { }
+
+        public ToString(): string {
+            return `${this.WikiId}::${this.Title}`;
+        }
+    };
+
     /** Udostępnia interfejs do Wikidanych */
     export class WikidataClient {
         /** Przechowuje wcześniej pobrane linki. Czyszczone przy przeładowaniu strony */
-        protected static SitelinkCache: Map<string, Sitelink[]> = new Map();
+        protected static SitelinkCache: Map<string, WikidataResult> = new Map();
 
         /**
          * Zwraca listę linków do innych wersji językowych
-         * @param q_id Identyfikator elementu w Wikidanych
+         * @param article_id Identyfikator artykułu
          */
-        public static async GetSitelinks(q_id: string): Promise<Sitelink[]> {
-            let cached = this.SitelinkCache.get(q_id);
-            if(cached !== undefined) return cached;
+        public static async GetSitelinks(article_id: ArticleId): Promise<Sitelink[]> {
+            let cached = this.SitelinkCache.get(article_id.ToString());
+            if(cached !== undefined) return cached.Sitelinks;
 
-            let sitelinks = await this.FetchSitelinks(q_id);
-            this.SitelinkCache.set(q_id, sitelinks);
-            return sitelinks;
+            let result = await this.FetchSitelinks(article_id);
+            this.SitelinkCache.set(article_id.ToString(), result);
+            return result.Sitelinks;
         }
 
         /**
          * Pobiera listę linków do innych wersji językowych z Wikidanych
-         * @param q_id Identyfikator elementu w Wikidanych
+         * @param article Identyfikator artykułu
          */
-        protected static FetchSitelinks(q_id: string) {
-            return new Promise<Sitelink[]>((resolve, reject) => {
+        protected static FetchSitelinks(article: ArticleId) {
+            return new Promise<WikidataResult>((resolve, reject) => {
 
                 // mw.ForeignApi nie istnieje u użytkowników niezalogowanych
                 // Dlatego żądanie trzeba zrealizować "ręcznie"
-                var xhr = new XMLHttpRequest();
+                let xhr = new XMLHttpRequest();
                 xhr.addEventListener('load', () => {
                     try {
                         let data = JSON.parse(xhr.responseText);
-                        let entity = data.entities[q_id];
+                        let entity = Object.entries(data.entities)[0] as [string, any];
 
-                        resolve(WikidataClient.ParseSitelinks(entity.sitelinks));
+                        let q_id = entity[0];
+                        let sitelinks = WikidataClient.ParseSitelinks(entity[1].sitelinks);
+                        resolve({
+                            QId: q_id,
+                            Sitelinks: sitelinks
+                        });
                     } catch(e) {
                         reject(e);
                     }
                 });
+
+                let selector = `ids=${article.Title}`;
+                if(article.WikiId != ArticleId.WIKIDATA) {
+                    selector = `sites=${article.WikiId}&titles=${article.Title}`;
+                }
+
                 xhr.addEventListener('error', () => reject());
-                xhr.open('GET', `https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=${q_id}&origin=https%3A%2F%2F${window.location.hostname}&props=sitelinks`, true);
+                xhr.open('GET', `https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&${selector}&origin=https%3A%2F%2F${window.location.hostname}&props=sitelinks`, true);
                 xhr.send();
             });
         }
