@@ -1,33 +1,65 @@
 namespace Msz2001.InterwikiLanglist {
+    /**
+     * Wyszukuje hiperłącze do innego projektu Wikimedia wewnątrz elementu
+     * @param iw_link_wrapper Wrapper linku interwiki
+     */
+    let extractInterwikiLink = (iw_link_wrapper: HTMLElement) => {
+        for(let child of iw_link_wrapper.children) {
+            if(child instanceof HTMLAnchorElement) return child;
+        }
+        return null;
+    };
+
+    /**
+     * Wyciąga identyfikator artykułu z linku
+     * @param iw_link Hiperłącze interwiki
+     */
+    let extractArticleId = (iw_link: HTMLAnchorElement) => {
+        let title_prefix = '.org/wiki/';
+        let title_prefix_pos = iw_link.href.indexOf(title_prefix);
+        if(title_prefix_pos < 0) return null;
+
+        let title_pos = title_prefix_pos + title_prefix.length;
+        let title = iw_link.href.substr(title_pos);
+
+        //(język).wikipedia.org/ poprzedzone opcjonalnie "m." i/lub "www."
+        let match = /\/\/(?:www.)?(?:m.)?([^.]+)\.wikipedia\.org\//i.exec(iw_link.href);
+        let lang = match?.[1];
+        if(lang !== undefined) {
+            return new ArticleId(lang + 'wiki', title);
+        }
+
+        // Sprawdź, czy link prowadzi do Wikidanych
+        if(iw_link.href.indexOf('wikidata.org') >= 0) {
+            return new ArticleId(ArticleId.WIKIDATA, title);
+        }
+
+        return null;
+    };
+
     $(() => {
-        // Wyszukaj interwiki do Wikidanych
-        let wd_links = document.querySelectorAll('.link-interwiki-wd');
+        // Wyszukaj interwiki wstawione za pomocą {link-interwiki}
+        let iw_link_wrappers = document.querySelectorAll('.link-interwiki');
         let langlist = new LangList();
 
-        for(let wd_link of wd_links) {
-            if(!(wd_link instanceof HTMLElement)) continue;
+        for(let iw_link_wrapper of iw_link_wrappers) {
+            if(!(iw_link_wrapper instanceof HTMLElement)) continue;
 
-            // Znajdź link i wyciągnij z niego identyfikator elementu
-            let q_id = '';
-            let inner_link: HTMLAnchorElement | undefined;
-            for(let child of wd_link.children) {
-                if(!(child instanceof HTMLAnchorElement)) continue;
-                if(child.href.indexOf('wikidata.org') < 0) continue;
+            // Znajdź link; jeśli nie istnieje, to pomiń iterację
+            let interwiki_link = extractInterwikiLink(iw_link_wrapper);
+            if(interwiki_link === null) continue;
 
-                let q_pos = child.href.lastIndexOf('/Q');
-                q_id = child.href.substr(q_pos + 1);
+            const article_id = extractArticleId(interwiki_link);
+            if(article_id === null) continue;
 
-                // Wyłącz link do Wikidanych i zastąp ikonkę bardziej czytelnym symbolem
-                child.href = 'javascript:void(0)';
-                child.title = 'Zobacz, w jakich językach ten artykuł istnieje';
-                child.innerHTML = '<img src="//upload.wikimedia.org/wikipedia/commons/4/45/Translate_link_color_crop.svg" alt="[w innych językach]" width="12" />';
-                inner_link = child;
-                break;
-            }
+            // Wyłącz link interwiki i zastąp go symbolem wyboru języka
+            interwiki_link.href = 'javascript:void(0)';
+            interwiki_link.title = 'Zobacz, w jakich językach ten artykuł istnieje';
+            interwiki_link.innerHTML = '<img src="//upload.wikimedia.org/wikipedia/commons/4/45/Translate_link_color_crop.svg" alt="[w innych językach]" width="12" />';
 
             let red_link: HTMLAnchorElement | undefined;
-            if(wd_link.previousElementSibling instanceof HTMLAnchorElement) {
-                red_link = wd_link.previousElementSibling;
+            if(iw_link_wrapper.previousElementSibling instanceof HTMLAnchorElement) {
+                red_link = iw_link_wrapper.previousElementSibling;
             }
 
             let is_minerva = document.body.classList.contains('skin-minerva');
@@ -43,26 +75,25 @@ namespace Msz2001.InterwikiLanglist {
             let display_langlist = (reason: VisibilityChangeReason, e?: MouseEvent) => {
                 if(langlist.IsVisible) return;
 
-                let article_id = new ArticleId(ArticleId.WIKIDATA, q_id);
                 let result = WikidataClient.GetSitelinks(article_id);
                 langlist.Populate(result, red_link?.href);
-                langlist.Display(wd_link as HTMLElement, reason, red_link);
+                langlist.Display(iw_link_wrapper as HTMLElement, reason, red_link);
                 e?.preventDefault();
             };
 
             // Kliknięcie ikonkę pokazuje panel języków
-            inner_link?.addEventListener('click', (e) => display_langlist(VisibilityChangeReason.KeyPress, e));
+            interwiki_link?.addEventListener('click', (e) => display_langlist(VisibilityChangeReason.KeyPress, e));
 
             // Poza skórką Minerva, panel pokazuje się również po najechaniu na ikonkę
             // W Minervie z kolei, można kliknąć również na czerwony link
             if(!is_minerva) {
-                wd_link.addEventListener('mouseenter', () => display_langlist(VisibilityChangeReason.MouseMove));
+                iw_link_wrapper.addEventListener('mouseenter', () => display_langlist(VisibilityChangeReason.MouseMove));
             } else {
                 red_link?.addEventListener('click', (e) => display_langlist(VisibilityChangeReason.KeyPress, e));
             }
         }
 
-        if(wd_links.length > 0) {
+        if(iw_link_wrappers.length > 0) {
             // Służy do ukrywania selektora języków
             document.addEventListener('mousemove', (ev) => {
                 if(!langlist.IsVisible) return;
