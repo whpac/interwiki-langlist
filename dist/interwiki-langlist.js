@@ -395,33 +395,37 @@ var Msz2001;
             /**
              * Wypełnia listę języków
              * @param q_id Identyfikator w Wikidanych
-             * @param languages Lista nazw w innych językach
+             * @param response_awaiter Odpowiedź z Wikidanych
              * @param create_url Link do utworzenia artykułu
              */
-            LangList.prototype.Populate = function (q_id, languages, create_url) {
+            LangList.prototype.Populate = function (response_awaiter, create_url) {
                 return __awaiter(this, void 0, void 0, function () {
-                    var _a, _b, e_1;
-                    return __generator(this, function (_c) {
-                        switch (_c.label) {
+                    var response, e_1;
+                    var _this = this;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
                             case 0:
-                                this.View.SetWikidataElement(q_id);
                                 this.View.SetCreateUrl(create_url);
-                                _c.label = 1;
+                                _a.label = 1;
                             case 1:
-                                _c.trys.push([1, 3, , 4]);
-                                _b = (_a = this.View).PopulateLanguagesList;
-                                return [4 /*yield*/, languages];
+                                _a.trys.push([1, 3, , 4]);
+                                return [4 /*yield*/, response_awaiter];
                             case 2:
-                                _b.apply(_a, [_c.sent()]);
+                                response = _a.sent();
+                                if (response.QId !== null)
+                                    this.View.SetWikidataElement(response.QId);
+                                this.View.PopulateLanguagesList(response.Sitelinks, response.ArticleId.WikiId);
                                 return [3 /*break*/, 4];
                             case 3:
-                                e_1 = _c.sent();
+                                e_1 = _a.sent();
                                 this.View.DisplayLoadingError();
                                 return [3 /*break*/, 4];
                             case 4:
-                                if (this.AutoFocused)
-                                    this.View.FocusFirstLink();
-                                this.RepositionSelf();
+                                window.requestAnimationFrame(function () {
+                                    if (_this.AutoFocused)
+                                        _this.View.FocusFirstLink();
+                                    _this.RepositionSelf();
+                                });
                                 return [2 /*return*/];
                         }
                     });
@@ -577,9 +581,9 @@ var Msz2001;
                 this.LoadingError.classList.add('notice');
                 this.LoadingError.textContent = 'Nie udało się wczytać listy języków';
                 wrapper.appendChild(this.LoadingError);
-                var footer = document.createElement('footer');
-                footer.textContent = 'Pobrano z ';
-                wrapper.appendChild(footer);
+                this.ListFooter = document.createElement('footer');
+                this.ListFooter.textContent = 'Pobrano z ';
+                wrapper.appendChild(this.ListFooter);
                 this.WikidataLink = document.createElement('a');
                 this.WikidataLink.textContent = 'elementu Wikidanych';
                 this.WikidataLink.href = 'https://wikidata.org';
@@ -590,7 +594,7 @@ var Msz2001;
                         e.preventDefault();
                     }
                 }).bind(this));
-                footer.appendChild(this.WikidataLink);
+                this.ListFooter.appendChild(this.WikidataLink);
                 wrapper.addEventListener('keydown', (function (e) {
                     // Po naciśnięciu klawisza Shift+Tab, przejdź do ostatniego linku
                     if (e.code == 'Tab' && e.shiftKey) {
@@ -605,6 +609,7 @@ var Msz2001;
              */
             LangListView.prototype.SetWikidataElement = function (q_id) {
                 this.WikidataLink.href = "https://www.wikidata.org/wiki/Special:EntityData/" + q_id;
+                this.ListFooter.style.display = '';
             };
             /**
              * Ustawia adres docelowy przycisku "Utwórz stronę"
@@ -622,11 +627,12 @@ var Msz2001;
             /**
              * Wypełnia listę linków do wersji językowych
              * @param sitelinks Tablica linków do innych wersji językowych
+             * @param main_siteid Id projektu do oznaczenia jako główny
              */
-            LangListView.prototype.PopulateLanguagesList = function (sitelinks) {
+            LangListView.prototype.PopulateLanguagesList = function (sitelinks, main_siteid) {
                 var e_3, _a;
                 this.LanguagesList.innerText = '';
-                var processed_links = this.SortAndFilterLinks(sitelinks);
+                var processed_links = this.SortAndFilterLinks(sitelinks, main_siteid);
                 var hidden_li = [];
                 try {
                     for (var processed_links_1 = __values(processed_links), processed_links_1_1 = processed_links_1.next(); !processed_links_1_1.done; processed_links_1_1 = processed_links_1.next()) {
@@ -648,9 +654,13 @@ var Msz2001;
                                 badge_title = ' – dobry artykuł';
                                 break;
                         }
+                        if (sitelink.IsMain) {
+                            badge_title += ' (sugerowany przez autora)';
+                            li.style.fontWeight = 'bold';
+                        }
                         li.title = sitelink.Title + badge_title;
                         this.LanguagesList.appendChild(li);
-                        if (!sitelink.IsRecommended && processed_links.length > 10) {
+                        if (!sitelink.IsRecommended && !sitelink.IsMain && processed_links.length > 10) {
                             hidden_li.push(li);
                             li.style.display = 'none';
                         }
@@ -706,6 +716,7 @@ var Msz2001;
             LangListView.prototype.PrepareForNextDisplay = function () {
                 this.LanguagesList.innerText = '';
                 this.LanguagesList.style.display = 'none';
+                this.ListFooter.style.display = 'none';
                 this.NoLinks.style.display = 'none';
                 this.LoadingError.style.display = 'none';
                 this.Loading.style.display = '';
@@ -802,8 +813,9 @@ var Msz2001;
              * Odfiltrowuje linki do innych projektów niż Wikipedia. Sortuje je
              * według odznaczeń oraz preferencji użytkownika, odczytanych z ULS
              * @param sitelinks Tablica linków do innych języków
+             * @param main_siteid Id projektu do oznaczenia jako "główny"
              */
-            LangListView.prototype.SortAndFilterLinks = function (sitelinks) {
+            LangListView.prototype.SortAndFilterLinks = function (sitelinks, main_siteid) {
                 var e_7, _a;
                 var _b, _c;
                 //@ts-ignore - mw.uls nie istnieje w definicjach :(
@@ -829,6 +841,7 @@ var Msz2001;
                             LanguageCode: sitelink.LanguageCode,
                             LanguageName: InterwikiLanglist.GetLanguageName(sitelink.LanguageCode),
                             IsRecommended: recommended_langs.has(sitelink.LanguageCode),
+                            IsMain: sitelink.Site === main_siteid,
                             Badge: sitelink.Badge
                         };
                         switch (processed_link.Badge) {
@@ -883,37 +896,50 @@ var Msz2001;
             Badge[Badge["DA"] = 2] = "DA";
             Badge[Badge["LnM"] = 3] = "LnM";
         })(Badge = InterwikiLanglist.Badge || (InterwikiLanglist.Badge = {}));
+        var ArticleId = /** @class */ (function () {
+            function ArticleId(WikiId, Title) {
+                this.WikiId = WikiId;
+                this.Title = Title;
+            }
+            ArticleId.prototype.ToString = function () {
+                return this.WikiId + "::" + this.Title;
+            };
+            ArticleId.WIKIDATA = 'wikidatawiki';
+            return ArticleId;
+        }());
+        InterwikiLanglist.ArticleId = ArticleId;
+        ;
         /** Udostępnia interfejs do Wikidanych */
         var WikidataClient = /** @class */ (function () {
             function WikidataClient() {
             }
             /**
              * Zwraca listę linków do innych wersji językowych
-             * @param q_id Identyfikator elementu w Wikidanych
+             * @param article_id Identyfikator artykułu
              */
-            WikidataClient.GetSitelinks = function (q_id) {
+            WikidataClient.GetSitelinks = function (article_id) {
                 return __awaiter(this, void 0, void 0, function () {
-                    var cached, sitelinks;
+                    var cached, result;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
-                                cached = this.SitelinkCache.get(q_id);
+                                cached = this.SitelinkCache.get(article_id.ToString());
                                 if (cached !== undefined)
                                     return [2 /*return*/, cached];
-                                return [4 /*yield*/, this.FetchSitelinks(q_id)];
+                                return [4 /*yield*/, this.FetchSitelinks(article_id)];
                             case 1:
-                                sitelinks = _a.sent();
-                                this.SitelinkCache.set(q_id, sitelinks);
-                                return [2 /*return*/, sitelinks];
+                                result = _a.sent();
+                                this.SitelinkCache.set(article_id.ToString(), result);
+                                return [2 /*return*/, result];
                         }
                     });
                 });
             };
             /**
              * Pobiera listę linków do innych wersji językowych z Wikidanych
-             * @param q_id Identyfikator elementu w Wikidanych
+             * @param article Identyfikator artykułu
              */
-            WikidataClient.FetchSitelinks = function (q_id) {
+            WikidataClient.FetchSitelinks = function (article) {
                 return new Promise(function (resolve, reject) {
                     // mw.ForeignApi nie istnieje u użytkowników niezalogowanych
                     // Dlatego żądanie trzeba zrealizować "ręcznie"
@@ -921,15 +947,32 @@ var Msz2001;
                     xhr.addEventListener('load', function () {
                         try {
                             var data = JSON.parse(xhr.responseText);
-                            var entity = data.entities[q_id];
-                            resolve(WikidataClient.ParseSitelinks(entity.sitelinks));
+                            var entity = Object.entries(data.entities)[0];
+                            var q_id = entity[0];
+                            if (!q_id.startsWith('Q'))
+                                q_id = null;
+                            var sitelinks = WikidataClient.ParseSitelinks(entity[1].sitelinks);
+                            if (sitelinks.length == 0 && article.WikiId != ArticleId.WIKIDATA) {
+                                sitelinks = [WikidataClient.ArticleIdToSitelink(article)];
+                            }
+                            resolve({
+                                ArticleId: article,
+                                QId: q_id,
+                                Sitelinks: sitelinks
+                            });
                         }
                         catch (e) {
                             reject(e);
                         }
                     });
+                    var title = article.Title.replace('&', '%26');
+                    title = title.replace('=', '%3D');
+                    var selector = "ids=" + title;
+                    if (article.WikiId != ArticleId.WIKIDATA) {
+                        selector = "sites=" + article.WikiId + "&titles=" + title;
+                    }
                     xhr.addEventListener('error', function () { return reject(); });
-                    xhr.open('GET', "https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=" + q_id + "&origin=https%3A%2F%2F" + window.location.hostname + "&props=sitelinks", true);
+                    xhr.open('GET', "https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&" + selector + "&origin=https%3A%2F%2F" + window.location.hostname + "&props=sitelinks", true);
                     xhr.send();
                 });
             };
@@ -966,6 +1009,20 @@ var Msz2001;
                 }
                 return links;
             };
+            /**
+             * Przetwarza id artykułu na obiekt opisujący link
+             * @param article Id artykułu
+             */
+            WikidataClient.ArticleIdToSitelink = function (article) {
+                var wiki_pos = article.WikiId.lastIndexOf('wiki');
+                var lang_code = article.WikiId.substr(0, wiki_pos);
+                return {
+                    Title: article.Title,
+                    Site: article.WikiId,
+                    LanguageCode: lang_code,
+                    Badge: Badge.None
+                };
+            };
             /** Przechowuje wcześniej pobrane linki. Czyszczone przy przeładowaniu strony */
             WikidataClient.SitelinkCache = new Map();
             return WikidataClient;
@@ -973,125 +1030,182 @@ var Msz2001;
         InterwikiLanglist.WikidataClient = WikidataClient;
     })(InterwikiLanglist = Msz2001.InterwikiLanglist || (Msz2001.InterwikiLanglist = {}));
 })(Msz2001 || (Msz2001 = {}));
-$(function () {
-    var e_8, _a;
-    var _b;
-    // Wyszukaj interwiki do Wikidanych
-    var wd_links = document.querySelectorAll('.link-interwiki-wd');
-    var langlist = new Msz2001.InterwikiLanglist.LangList();
-    var _loop_1 = function (wd_link) {
-        var e_9, _c;
-        if (!(wd_link instanceof HTMLElement))
-            return "continue";
-        // Znajdź link i wyciągnij z niego identyfikator elementu
-        var q_id = '';
-        var inner_link = void 0;
-        try {
-            for (var _d = (e_9 = void 0, __values(wd_link.children)), _e = _d.next(); !_e.done; _e = _d.next()) {
-                var child = _e.value;
-                if (!(child instanceof HTMLAnchorElement))
-                    continue;
-                if (child.href.indexOf('wikidata.org') < 0)
-                    continue;
-                var q_pos = child.href.lastIndexOf('/Q');
-                q_id = child.href.substr(q_pos + 1);
-                // Wyłącz link do Wikidanych i zastąp ikonkę bardziej czytelnym symbolem
-                child.href = 'javascript:void(0)';
-                child.title = 'Zobacz, w jakich językach ten artykuł istnieje';
-                child.innerHTML = '<img src="//upload.wikimedia.org/wikipedia/commons/4/45/Translate_link_color_crop.svg" alt="[w innych językach]" width="12" />';
-                inner_link = child;
-                break;
+var Msz2001;
+(function (Msz2001) {
+    var InterwikiLanglist;
+    (function (InterwikiLanglist) {
+        /**
+         * Wyszukuje hiperłącze do innego projektu Wikimedia wewnątrz elementu
+         * @param iw_link_wrapper Wrapper linku interwiki
+         */
+        var extractInterwikiLink = function (iw_link_wrapper) {
+            var e_8, _a, e_9, _b;
+            var _c;
+            if (!iw_link_wrapper.classList.contains('link-interwiki-wd')
+                && iw_link_wrapper.parentElement instanceof HTMLAnchorElement) {
+                // Jeżeli wrapper jest wewnątrz linku, wyciągnij go na zewnątrz
+                var link = iw_link_wrapper.parentElement;
+                (_c = link.parentElement) === null || _c === void 0 ? void 0 : _c.insertBefore(iw_link_wrapper, link);
+                try {
+                    // Przenieś dzieci wrappera do linku
+                    for (var _d = __values(iw_link_wrapper.childNodes), _e = _d.next(); !_e.done; _e = _d.next()) {
+                        var child = _e.value;
+                        link.appendChild(child);
+                    }
+                }
+                catch (e_8_1) { e_8 = { error: e_8_1 }; }
+                finally {
+                    try {
+                        if (_e && !_e.done && (_a = _d.return)) _a.call(_d);
+                    }
+                    finally { if (e_8) throw e_8.error; }
+                }
+                iw_link_wrapper.appendChild(link);
+                return link;
             }
-        }
-        catch (e_9_1) { e_9 = { error: e_9_1 }; }
-        finally {
             try {
-                if (_e && !_e.done && (_c = _d.return)) _c.call(_d);
+                for (var _f = __values(iw_link_wrapper.children), _g = _f.next(); !_g.done; _g = _f.next()) {
+                    var child = _g.value;
+                    if (child instanceof HTMLAnchorElement)
+                        return child;
+                }
             }
-            finally { if (e_9) throw e_9.error; }
-        }
-        var red_link;
-        if (wd_link.previousElementSibling instanceof HTMLAnchorElement) {
-            red_link = wd_link.previousElementSibling;
-        }
-        var is_minerva = document.body.classList.contains('skin-minerva');
-        if (is_minerva && red_link !== undefined) {
-            // Utwórz nowy link, by usunąć procedury obsługi zdarzeń,
-            // m.in. odpowiadające za wyświetlenia okna proponującego stworzenie strony
-            var cloned_link = red_link.cloneNode(true);
-            (_b = red_link.parentElement) === null || _b === void 0 ? void 0 : _b.insertBefore(cloned_link, red_link);
-            red_link.remove();
-            red_link = cloned_link;
-        }
-        var display_langlist = function (reason, e) {
-            if (langlist.IsVisible)
-                return;
-            var sitelinks = Msz2001.InterwikiLanglist.WikidataClient.GetSitelinks(q_id);
-            langlist.Populate(q_id, sitelinks, red_link === null || red_link === void 0 ? void 0 : red_link.href);
-            langlist.Display(wd_link, reason, red_link);
-            e === null || e === void 0 ? void 0 : e.preventDefault();
+            catch (e_9_1) { e_9 = { error: e_9_1 }; }
+            finally {
+                try {
+                    if (_g && !_g.done && (_b = _f.return)) _b.call(_f);
+                }
+                finally { if (e_9) throw e_9.error; }
+            }
+            return null;
         };
-        // Kliknięcie ikonkę pokazuje panel języków
-        inner_link === null || inner_link === void 0 ? void 0 : inner_link.addEventListener('click', function (e) { return display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.KeyPress, e); });
-        // Poza skórką Minerva, panel pokazuje się również po najechaniu na ikonkę
-        // W Minervie z kolei, można kliknąć również na czerwony link
-        if (!is_minerva) {
-            wd_link.addEventListener('mouseenter', function () { return display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.MouseMove); });
-        }
-        else {
-            red_link === null || red_link === void 0 ? void 0 : red_link.addEventListener('click', function (e) { return display_langlist(Msz2001.InterwikiLanglist.VisibilityChangeReason.KeyPress, e); });
-        }
-    };
-    try {
-        for (var wd_links_1 = __values(wd_links), wd_links_1_1 = wd_links_1.next(); !wd_links_1_1.done; wd_links_1_1 = wd_links_1.next()) {
-            var wd_link = wd_links_1_1.value;
-            _loop_1(wd_link);
-        }
-    }
-    catch (e_8_1) { e_8 = { error: e_8_1 }; }
-    finally {
-        try {
-            if (wd_links_1_1 && !wd_links_1_1.done && (_a = wd_links_1.return)) _a.call(wd_links_1);
-        }
-        finally { if (e_8) throw e_8.error; }
-    }
-    if (wd_links.length > 0) {
-        // Służy do ukrywania selektora języków
-        document.addEventListener('mousemove', function (ev) {
-            if (!langlist.IsVisible)
-                return;
-            var selector_rect = langlist.GetBoundingClientRect();
-            var is_out_X = ev.clientX < selector_rect.left || ev.clientX > selector_rect.right;
-            var is_out_Y = ev.clientY < selector_rect.top || ev.clientY > selector_rect.bottom;
-            if (is_out_X || is_out_Y)
-                langlist.Hide(Msz2001.InterwikiLanglist.VisibilityChangeReason.MouseMove);
-        });
-        document.addEventListener('keydown', function (e) {
-            if (e.code != 'Escape')
-                return;
-            langlist.Hide(Msz2001.InterwikiLanglist.VisibilityChangeReason.KeyPress);
-        });
-        // Jeśli za blisko jednej z krawędzi, przesuń się
-        var scrolling_1 = false;
-        window.addEventListener('scroll', function () {
-            // Ogranicza częstotliwość przeliczania położenia
-            if (!scrolling_1) {
-                window.requestAnimationFrame(function () {
-                    langlist.RepositionSelf();
-                    scrolling_1 = false;
+        /**
+         * Wyciąga identyfikator artykułu z linku
+         * @param iw_link Hiperłącze interwiki
+         */
+        var extractArticleId = function (iw_link) {
+            var title_prefix = '.org/wiki/';
+            var title_prefix_pos = iw_link.href.indexOf(title_prefix);
+            if (title_prefix_pos < 0)
+                return null;
+            var title_pos = title_prefix_pos + title_prefix.length;
+            var title = iw_link.href.substr(title_pos);
+            //(język).wikipedia.org/ poprzedzone opcjonalnie "m." i/lub "www."
+            var match = /\/\/(?:www.)?(?:m.)?([^.]+)\.wikipedia\.org\//i.exec(iw_link.href);
+            var lang = match === null || match === void 0 ? void 0 : match[1];
+            if (lang !== undefined) {
+                return new InterwikiLanglist.ArticleId(lang + 'wiki', title);
+            }
+            // Sprawdź, czy link prowadzi do Wikidanych
+            if (iw_link.href.indexOf('wikidata.org') >= 0) {
+                return new InterwikiLanglist.ArticleId(InterwikiLanglist.ArticleId.WIKIDATA, title);
+            }
+            return null;
+        };
+        $(function () {
+            var e_10, _a;
+            var _b;
+            // Wyszukaj interwiki wstawione za pomocą {link-interwiki}
+            var iw_link_wrappers = document.querySelectorAll('.link-interwiki');
+            var langlist = new InterwikiLanglist.LangList();
+            var _loop_1 = function (iw_link_wrapper) {
+                if (!(iw_link_wrapper instanceof HTMLElement))
+                    return "continue";
+                // Znajdź link; jeśli nie istnieje, to pomiń iterację
+                var interwiki_link = extractInterwikiLink(iw_link_wrapper);
+                if (interwiki_link === null)
+                    return "continue";
+                var article_id = extractArticleId(interwiki_link);
+                if (article_id === null)
+                    return "continue";
+                // Wyłącz link interwiki i zastąp go symbolem wyboru języka
+                interwiki_link.href = 'javascript:void(0)';
+                interwiki_link.title = 'Zobacz, w jakich językach ten artykuł istnieje';
+                interwiki_link.innerHTML = '<img src="//upload.wikimedia.org/wikipedia/commons/4/45/Translate_link_color_crop.svg" alt="[w innych językach]" width="12" />';
+                var red_link;
+                if (iw_link_wrapper.previousElementSibling instanceof HTMLAnchorElement) {
+                    red_link = iw_link_wrapper.previousElementSibling;
+                }
+                var is_minerva = document.body.classList.contains('skin-minerva');
+                if (is_minerva && red_link !== undefined) {
+                    // Utwórz nowy link, by usunąć procedury obsługi zdarzeń,
+                    // m.in. odpowiadające za wyświetlenia okna proponującego stworzenie strony
+                    var cloned_link = red_link.cloneNode(true);
+                    (_b = red_link.parentElement) === null || _b === void 0 ? void 0 : _b.insertBefore(cloned_link, red_link);
+                    red_link.remove();
+                    red_link = cloned_link;
+                }
+                var display_langlist = function (reason, e) {
+                    if (langlist.IsVisible)
+                        return;
+                    var result = InterwikiLanglist.WikidataClient.GetSitelinks(article_id);
+                    langlist.Display(iw_link_wrapper, reason, red_link);
+                    langlist.Populate(result, red_link === null || red_link === void 0 ? void 0 : red_link.href);
+                    e === null || e === void 0 ? void 0 : e.preventDefault();
+                };
+                // Kliknięcie ikonkę pokazuje panel języków
+                interwiki_link === null || interwiki_link === void 0 ? void 0 : interwiki_link.addEventListener('click', function (e) { return display_langlist(InterwikiLanglist.VisibilityChangeReason.KeyPress, e); });
+                // Poza skórką Minerva, panel pokazuje się również po najechaniu na ikonkę
+                // W Minervie z kolei, można kliknąć również na czerwony link
+                if (!is_minerva) {
+                    iw_link_wrapper.addEventListener('mouseenter', function () { return display_langlist(InterwikiLanglist.VisibilityChangeReason.MouseMove); });
+                }
+                else {
+                    red_link === null || red_link === void 0 ? void 0 : red_link.addEventListener('click', function (e) { return display_langlist(InterwikiLanglist.VisibilityChangeReason.KeyPress, e); });
+                }
+            };
+            try {
+                for (var iw_link_wrappers_1 = __values(iw_link_wrappers), iw_link_wrappers_1_1 = iw_link_wrappers_1.next(); !iw_link_wrappers_1_1.done; iw_link_wrappers_1_1 = iw_link_wrappers_1.next()) {
+                    var iw_link_wrapper = iw_link_wrappers_1_1.value;
+                    _loop_1(iw_link_wrapper);
+                }
+            }
+            catch (e_10_1) { e_10 = { error: e_10_1 }; }
+            finally {
+                try {
+                    if (iw_link_wrappers_1_1 && !iw_link_wrappers_1_1.done && (_a = iw_link_wrappers_1.return)) _a.call(iw_link_wrappers_1);
+                }
+                finally { if (e_10) throw e_10.error; }
+            }
+            if (iw_link_wrappers.length > 0) {
+                // Służy do ukrywania selektora języków
+                document.addEventListener('mousemove', function (ev) {
+                    if (!langlist.IsVisible)
+                        return;
+                    var selector_rect = langlist.GetBoundingClientRect();
+                    var is_out_X = ev.clientX < selector_rect.left || ev.clientX > selector_rect.right;
+                    var is_out_Y = ev.clientY < selector_rect.top || ev.clientY > selector_rect.bottom;
+                    if (is_out_X || is_out_Y)
+                        langlist.Hide(InterwikiLanglist.VisibilityChangeReason.MouseMove);
+                });
+                document.addEventListener('keydown', function (e) {
+                    if (e.code != 'Escape')
+                        return;
+                    langlist.Hide(InterwikiLanglist.VisibilityChangeReason.KeyPress);
+                });
+                // Jeśli za blisko jednej z krawędzi, przesuń się
+                var scrolling_1 = false;
+                window.addEventListener('scroll', function () {
+                    // Ogranicza częstotliwość przeliczania położenia
+                    if (!scrolling_1) {
+                        window.requestAnimationFrame(function () {
+                            langlist.RepositionSelf();
+                            scrolling_1 = false;
+                        });
+                    }
+                    scrolling_1 = true;
+                });
+                // Kliknięcie poza listą języków ukrywa ją
+                window.addEventListener('click', function (e) {
+                    if (!langlist.IsVisible)
+                        return;
+                    if (!(e.target instanceof HTMLElement))
+                        return;
+                    if (langlist.IsElementRelatedToPanel(e.target))
+                        return;
+                    langlist.Hide(InterwikiLanglist.VisibilityChangeReason.KeyPress);
                 });
             }
-            scrolling_1 = true;
         });
-        // Kliknięcie poza listą języków ukrywa ją
-        window.addEventListener('click', function (e) {
-            if (!langlist.IsVisible)
-                return;
-            if (!(e.target instanceof HTMLElement))
-                return;
-            if (langlist.IsElementRelatedToPanel(e.target))
-                return;
-            langlist.Hide(Msz2001.InterwikiLanglist.VisibilityChangeReason.KeyPress);
-        });
-    }
-});
+    })(InterwikiLanglist = Msz2001.InterwikiLanglist || (Msz2001.InterwikiLanglist = {}));
+})(Msz2001 || (Msz2001 = {}));
