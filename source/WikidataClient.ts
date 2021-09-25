@@ -41,13 +41,13 @@ namespace Msz2001.InterwikiLanglist {
          * Zwraca listę linków do innych wersji językowych
          * @param article_id Identyfikator artykułu
          */
-        public static async GetSitelinks(article_id: ArticleId): Promise<Sitelink[]> {
+        public static async GetSitelinks(article_id: ArticleId): Promise<WikidataResult> {
             let cached = this.SitelinkCache.get(article_id.ToString());
-            if(cached !== undefined) return cached.Sitelinks;
+            if(cached !== undefined) return cached;
 
             let result = await this.FetchSitelinks(article_id);
             this.SitelinkCache.set(article_id.ToString(), result);
-            return result.Sitelinks;
+            return result;
         }
 
         /**

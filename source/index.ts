@@ -44,8 +44,8 @@ namespace Msz2001.InterwikiLanglist {
                 if(langlist.IsVisible) return;
 
                 let article_id = new ArticleId(ArticleId.WIKIDATA, q_id);
-                let sitelinks = WikidataClient.GetSitelinks(article_id);
-                langlist.Populate(q_id, sitelinks, red_link?.href);
+                let result = WikidataClient.GetSitelinks(article_id);
+                langlist.Populate(result, red_link?.href);
                 langlist.Display(wd_link as HTMLElement, reason, red_link);
                 e?.preventDefault();
             };

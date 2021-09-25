@@ -46,15 +46,16 @@ namespace Msz2001.InterwikiLanglist {
         /**
          * Wypełnia listę języków
          * @param q_id Identyfikator w Wikidanych
-         * @param languages Lista nazw w innych językach
+         * @param response_awaiter Odpowiedź z Wikidanych
          * @param create_url Link do utworzenia artykułu
          */
-        public async Populate(q_id: string, languages: Promise<Sitelink[]>, create_url: string | undefined) {
-            this.View.SetWikidataElement(q_id);
+        public async Populate(response_awaiter: Promise<WikidataResult>, create_url: string | undefined) {
             this.View.SetCreateUrl(create_url);
 
             try {
-                this.View.PopulateLanguagesList(await languages);
+                let response = await response_awaiter;
+                this.View.SetWikidataElement(response.QId);
+                this.View.PopulateLanguagesList(response.Sitelinks);
             } catch(e) {
                 this.View.DisplayLoadingError();
             }
