@@ -4,6 +4,22 @@ namespace Msz2001.InterwikiLanglist {
      * @param iw_link_wrapper Wrapper linku interwiki
      */
     let extractInterwikiLink = (iw_link_wrapper: HTMLElement) => {
+        if(!iw_link_wrapper.classList.contains('link-interwiki-wd')
+            && iw_link_wrapper.parentElement instanceof HTMLAnchorElement) {
+
+            // Jeżeli wrapper jest wewnątrz linku, wyciągnij go na zewnątrz
+            let link = iw_link_wrapper.parentElement;
+            link.parentElement?.insertBefore(iw_link_wrapper, link);
+
+            // Przenieś dzieci wrappera do linku
+            for(let child of iw_link_wrapper.childNodes) {
+                link.appendChild(child);
+            }
+            iw_link_wrapper.appendChild(link);
+
+            return link;
+        }
+
         for(let child of iw_link_wrapper.children) {
             if(child instanceof HTMLAnchorElement) return child;
         }
