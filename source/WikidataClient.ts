@@ -16,7 +16,7 @@ namespace Msz2001.InterwikiLanglist {
 
     export type WikidataResult = {
         ArticleId: ArticleId;
-        QId: string;
+        QId: string | null;
         Sitelinks: Sitelink[];
     };
 
@@ -66,8 +66,13 @@ namespace Msz2001.InterwikiLanglist {
                         let data = JSON.parse(xhr.responseText);
                         let entity = Object.entries(data.entities)[0] as [string, any];
 
-                        let q_id = entity[0];
+                        let q_id: string | null = entity[0];
+                        if(!q_id.startsWith('Q')) q_id = null;
+
                         let sitelinks = WikidataClient.ParseSitelinks(entity[1].sitelinks);
+                        if(sitelinks.length == 0 && article.WikiId != ArticleId.WIKIDATA) {
+                            sitelinks = [WikidataClient.ArticleIdToSitelink(article)];
+                        }
                         resolve({
                             ArticleId: article,
                             QId: q_id,
@@ -78,9 +83,12 @@ namespace Msz2001.InterwikiLanglist {
                     }
                 });
 
-                let selector = `ids=${article.Title}`;
+                let title = article.Title.replace('&', '%26');
+                title = title.replace('=', '%3D');
+
+                let selector = `ids=${title}`;
                 if(article.WikiId != ArticleId.WIKIDATA) {
-                    selector = `sites=${article.WikiId}&titles=${article.Title}`;
+                    selector = `sites=${article.WikiId}&titles=${title}`;
                 }
 
                 xhr.addEventListener('error', () => reject());
@@ -121,6 +129,22 @@ namespace Msz2001.InterwikiLanglist {
             }
 
             return links;
+        }
+
+        /**
+         * Przetwarza id artykułu na obiekt opisujący link
+         * @param article Id artykułu
+         */
+        protected static ArticleIdToSitelink(article: ArticleId): Sitelink {
+            let wiki_pos = article.WikiId.lastIndexOf('wiki');
+            let lang_code = article.WikiId.substr(0, wiki_pos);
+
+            return {
+                Title: article.Title,
+                Site: article.WikiId,
+                LanguageCode: lang_code,
+                Badge: Badge.None
+            };
         }
     }
 }
