@@ -1,4 +1,4 @@
-.link-interwiki-wd a {text-decoration:none; font-size:0.8em; cursor:default;}
+.link-interwiki a {text-decoration:none; font-size:0.8em; cursor:default;}
 
 .interwiki-langlist-wrapper {
     background:#fff; border:1px solid #bbb; position:fixed; border-radius:4px;
@@ -76,7 +76,7 @@ body.skin-minerva .interwiki-langlist-wrapper.shown + .interwiki-langlist-backdr
     display:block;
 }
 
-body.skin-minerva .link-interwiki-wd a {cursor:pointer;}
+body.skin-minerva .link-interwiki a {cursor:pointer;}
 
 @media only screen and (min-width:432px){
     body.skin-minerva .interwiki-langlist-wrapper {padding:16px calc(50vw - 200px);}
@@ -91,5 +91,5 @@ html.enable-dark-skin .interwiki-langlist-wrapper .notice {color:#999;}
 html.enable-dark-skin .interwiki-langlist-wrapper li.badge-anm::after,
 html.enable-dark-skin .interwiki-langlist-wrapper li.badge-lnm::after {border-color:#e4c000;}
 html.enable-dark-skin .interwiki-langlist-wrapper li.badge-da::after {border-color:#888;}
-html.enable-dark-skin .link-interwiki-wd img {filter:invert(1) hue-rotate(180deg);}
+html.enable-dark-skin .link-interwiki img {filter:invert(1) hue-rotate(180deg);}
 html.enable-dark-skin .interwiki-langlist-backdrop {background:rgba(0,0,0,0.7);}
