@@ -92,8 +92,8 @@ namespace Msz2001.InterwikiLanglist {
                 if(langlist.IsVisible) return;
 
                 let result = WikidataClient.GetSitelinks(article_id);
-                langlist.Populate(result, red_link?.href);
                 langlist.Display(iw_link_wrapper as HTMLElement, reason, red_link);
+                langlist.Populate(result, red_link?.href);
                 e?.preventDefault();
             };
 

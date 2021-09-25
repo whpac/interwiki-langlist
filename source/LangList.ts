@@ -59,8 +59,10 @@ namespace Msz2001.InterwikiLanglist {
             } catch(e) {
                 this.View.DisplayLoadingError();
             }
-            if(this.AutoFocused) this.View.FocusFirstLink();
-            this.RepositionSelf();
+            window.requestAnimationFrame(() => {
+                if(this.AutoFocused) this.View.FocusFirstLink();
+                this.RepositionSelf();
+            });
         }
 
         /**
