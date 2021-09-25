@@ -55,7 +55,7 @@ namespace Msz2001.InterwikiLanglist {
             try {
                 let response = await response_awaiter;
                 this.View.SetWikidataElement(response.QId);
-                this.View.PopulateLanguagesList(response.Sitelinks);
+                this.View.PopulateLanguagesList(response.Sitelinks, response.ArticleId.WikiId);
             } catch(e) {
                 this.View.DisplayLoadingError();
             }

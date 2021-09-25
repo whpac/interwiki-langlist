@@ -5,6 +5,7 @@ namespace Msz2001.InterwikiLanglist {
         LanguageCode: string;
         LanguageName: string;
         IsRecommended: boolean;
+        IsMain: boolean;
         Badge: Badge;
     };
 
@@ -105,11 +106,12 @@ namespace Msz2001.InterwikiLanglist {
         /**
          * Wypełnia listę linków do wersji językowych
          * @param sitelinks Tablica linków do innych wersji językowych
+         * @param main_siteid Id projektu do oznaczenia jako główny
          */
-        public PopulateLanguagesList(sitelinks: Sitelink[]) {
+        public PopulateLanguagesList(sitelinks: Sitelink[], main_siteid?: string) {
             this.LanguagesList.innerText = '';
 
-            let processed_links = this.SortAndFilterLinks(sitelinks);
+            let processed_links = this.SortAndFilterLinks(sitelinks, main_siteid);
             let hidden_li: HTMLElement[] = [];
             for(let sitelink of processed_links) {
                 let li = document.createElement('li');
@@ -130,10 +132,15 @@ namespace Msz2001.InterwikiLanglist {
                         badge_title = ' – dobry artykuł';
                         break;
                 }
+                if(sitelink.IsMain) {
+                    badge_title += ' (sugerowany przez autora)';
+                    li.style.fontWeight = 'bold';
+                }
+
                 li.title = sitelink.Title + badge_title;
                 this.LanguagesList.appendChild(li);
 
-                if(!sitelink.IsRecommended && processed_links.length > 10) {
+                if(!sitelink.IsRecommended && !sitelink.IsMain && processed_links.length > 10) {
                     hidden_li.push(li);
                     li.style.display = 'none';
                 }
@@ -254,8 +261,9 @@ namespace Msz2001.InterwikiLanglist {
          * Odfiltrowuje linki do innych projektów niż Wikipedia. Sortuje je
          * według odznaczeń oraz preferencji użytkownika, odczytanych z ULS
          * @param sitelinks Tablica linków do innych języków
+         * @param main_siteid Id projektu do oznaczenia jako "główny"
          */
-        protected SortAndFilterLinks(sitelinks: Sitelink[]): ProcessedSitelink[] {
+        protected SortAndFilterLinks(sitelinks: Sitelink[], main_siteid?: string): ProcessedSitelink[] {
             //@ts-ignore - mw.uls nie istnieje w definicjach :(
             let recommended_langs: Set<string> = new Set(mw?.uls?.getFrequentLanguageList() ?? []);
             // Upewnij się, że w rekomendowanych językach jest kilka ważniejszych Wikipedii
@@ -278,6 +286,7 @@ namespace Msz2001.InterwikiLanglist {
                     LanguageCode: sitelink.LanguageCode,
                     LanguageName: GetLanguageName(sitelink.LanguageCode),
                     IsRecommended: recommended_langs.has(sitelink.LanguageCode),
+                    IsMain: sitelink.Site === main_siteid,
                     Badge: sitelink.Badge
                 };
 

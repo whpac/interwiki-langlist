@@ -15,6 +15,7 @@ namespace Msz2001.InterwikiLanglist {
     }
 
     export type WikidataResult = {
+        ArticleId: ArticleId;
         QId: string;
         Sitelinks: Sitelink[];
     };
@@ -68,6 +69,7 @@ namespace Msz2001.InterwikiLanglist {
                         let q_id = entity[0];
                         let sitelinks = WikidataClient.ParseSitelinks(entity[1].sitelinks);
                         resolve({
+                            ArticleId: article,
                             QId: q_id,
                             Sitelinks: sitelinks
                         });
