@@ -12,6 +12,7 @@ namespace Msz2001.InterwikiLanglist {
     export class LangListView {
         protected WikidataLink: HTMLAnchorElement;
         protected LanguagesList: HTMLElement;
+        protected ListFooter: HTMLElement;
         protected NoLinks: HTMLElement;
         protected Loading: HTMLElement;
         protected LoadingError: HTMLElement;
@@ -52,9 +53,9 @@ namespace Msz2001.InterwikiLanglist {
             this.LoadingError.textContent = 'Nie udało się wczytać listy języków';
             wrapper.appendChild(this.LoadingError);
 
-            let footer = document.createElement('footer');
-            footer.textContent = 'Pobrano z ';
-            wrapper.appendChild(footer);
+            this.ListFooter = document.createElement('footer');
+            this.ListFooter.textContent = 'Pobrano z ';
+            wrapper.appendChild(this.ListFooter);
 
             this.WikidataLink = document.createElement('a');
             this.WikidataLink.textContent = 'elementu Wikidanych';
@@ -66,7 +67,7 @@ namespace Msz2001.InterwikiLanglist {
                     e.preventDefault();
                 }
             }).bind(this));
-            footer.appendChild(this.WikidataLink);
+            this.ListFooter.appendChild(this.WikidataLink);
 
             wrapper.addEventListener('keydown', ((e: KeyboardEvent) => {
                 // Po naciśnięciu klawisza Shift+Tab, przejdź do ostatniego linku
@@ -84,6 +85,7 @@ namespace Msz2001.InterwikiLanglist {
          */
         public SetWikidataElement(q_id: string) {
             this.WikidataLink.href = `https://www.wikidata.org/wiki/Special:EntityData/${q_id}`;
+            this.ListFooter.style.display = '';
         }
 
         /**
@@ -171,6 +173,7 @@ namespace Msz2001.InterwikiLanglist {
         public PrepareForNextDisplay() {
             this.LanguagesList.innerText = '';
             this.LanguagesList.style.display = 'none';
+            this.ListFooter.style.display = 'none';
 
             this.NoLinks.style.display = 'none';
             this.LoadingError.style.display = 'none';
