@@ -54,6 +54,8 @@ namespace Msz2001.InterwikiLanglist {
     };
 
     $(() => {
+        LoadLanguageNames();
+
         // Wyszukaj interwiki wstawione za pomocą {link-interwiki}
         let iw_link_wrappers = document.querySelectorAll('.link-interwiki');
         let langlist = new LangList();

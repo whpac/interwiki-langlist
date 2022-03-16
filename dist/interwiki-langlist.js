@@ -50,303 +50,7 @@ var Msz2001;
 (function (Msz2001) {
     var InterwikiLanglist;
     (function (InterwikiLanglist) {
-        var langs = {
-            "aa": "afar",
-            "ab": "abchaski",
-            "ace": "aceh",
-            "ady": "adygejski",
-            "af": "afrykanerski",
-            "ak": "akan",
-            "als": "alemański",
-            "am": "amharski",
-            "an": "aragoński",
-            "ang": "staroangielski",
-            "anp": "angika",
-            "ar": "arabski",
-            "arc": "aramejski",
-            "arz": "arabski (Egipt)",
-            "as": "asamski",
-            "ast": "asturyjski",
-            "av": "awarski",
-            "ay": "ajmara",
-            "az": "azerski",
-            "azb": "południowoazerski",
-            "ba": "baszkirski",
-            "ban": "balijski",
-            "bar": "bawarski",
-            "bat_smg": "żmudzki",
-            "bcl": "środkowy bikolski",
-            "be": "białoruski",
-            "be_x_old": "białoruski (taraszkiewica)",
-            "bg": "bułgarski",
-            "bh": "bihari",
-            "bi": "bislama",
-            "bjn": "bandżarski",
-            "bm": "bambara",
-            "bn": "bengalski",
-            "bo": "tybetański",
-            "bpy": "bisznuprija-manipuri",
-            "br": "bretoński",
-            "bs": "bośniacki",
-            "bug": "bugijski",
-            "bxr": "buriacki",
-            "ca": "kataloński",
-            "cbk_zam": "chavacano",
-            "cdo": "mindong",
-            "ce": "czeczeński",
-            "ceb": "cebuano",
-            "ch": "czamorro",
-            "cho": "czoktaw",
-            "chr": "czirokeski",
-            "chy": "czejeński",
-            "ckb": "sorani",
-            "co": "korsykański",
-            "cr": "kri",
-            "crh": "krymskotatarski",
-            "cs": "czeski",
-            "csb": "kaszubski",
-            "cu": "staro-cerkiewno-słowiański",
-            "cv": "czuwaski",
-            "cy": "walijski",
-            "da": "duński",
-            "de": "niemiecki",
-            "diq": "zazaki",
-            "dsb": "dolnołużycki",
-            "dv": "malediwski",
-            "dz": "dzongkha",
-            "ee": "ewe",
-            "el": "nowogrecki",
-            "eml": "emilijski",
-            "en": "angielski",
-            "eo": "esperanto",
-            "es": "hiszpański",
-            "et": "estoński",
-            "eu": "baskijski",
-            "ext": "estremadurski",
-            "fa": "perski",
-            "ff": "ful",
-            "fi": "fiński",
-            "fiu_vro": "võro",
-            "fj": "fidżyjski",
-            "fo": "farerski",
-            "fr": "francuski",
-            "frp": "franko-prowansalski",
-            "frr": "północnofryzyjski",
-            "fur": "friulski",
-            "fy": "fryzyjski",
-            "ga": "irlandzki",
-            "gag": "gagauski",
-            "gan": "gan",
-            "gd": "gaelicki szkocki",
-            "gl": "galicyjski",
-            "glk": "giliański",
-            "gn": "guarani",
-            "gom": "konkani",
-            "got": "gocki",
-            "gu": "gudźarati",
-            "gv": "manx",
-            "ha": "hausa",
-            "hak": "hakka",
-            "haw": "hawajski",
-            "he": "hebrajski",
-            "hi": "hindi",
-            "hif": "hindi fidżyjskie",
-            "ho": "hiri motu",
-            "hr": "chorwacki",
-            "hsb": "górnołużycki",
-            "ht": "haitański",
-            "hu": "węgierski",
-            "hy": "ormiański",
-            "hz": "herero",
-            "ia": "interlingua",
-            "id": "indonezyjski",
-            "ie": "occidental",
-            "ig": "igbo",
-            "ii": "nuosu",
-            "ik": "inupiak",
-            "ilo": "ilokano",
-            "io": "ido",
-            "is": "islandzki",
-            "it": "włoski",
-            "iu": "inuktitut",
-            "ja": "japoński",
-            "jbo": "lojban",
-            "jv": "jawajski",
-            "ka": "gruziński",
-            "kaa": "karakałpacki",
-            "kab": "kabylski",
-            "kbd": "kabardyjski",
-            "kg": "kongo",
-            "ki": "kikuju",
-            "kj": "kwanyama",
-            "kk": "kazachski",
-            "kl": "grenlandzki",
-            "km": "khmerski",
-            "kn": "kannada",
-            "ko": "koreański",
-            "koi": "komi-permiacki",
-            "kr": "kanuri",
-            "krc": "karaczajsko-bałkarski",
-            "ks": "kaszmirski",
-            "ksh": "rypuaryjski",
-            "ku": "kurdysjki",
-            "kv": "komi",
-            "kw": "kornijski",
-            "ky": "kirgiski",
-            "la": "łaciński",
-            "lad": "ladino",
-            "lb": "luksemburski",
-            "lbe": "lakijski",
-            "lez": "lezgiński",
-            "lg": "luganda",
-            "li": "limburski",
-            "lij": "liguryjski",
-            "lmo": "lombardzki",
-            "ln": "lingala",
-            "lo": "laotański",
-            "lrc": "luri",
-            "lt": "litewski",
-            "ltg": "łatgalski",
-            "lv": "łotewski",
-            "mad": "madurski",
-            "mai": "maithili",
-            "map_bms": "banjumasański",
-            "mdf": "moksza",
-            "mg": "malgaski",
-            "mh": "marszalski",
-            "mhr": "maryjski wschodni",
-            "mi": "maoryski",
-            "min": "minangkabau",
-            "mk": "macedoński",
-            "ml": "malajalam",
-            "mn": "mongolski",
-            "mo": "mołdawski",
-            "mr": "marathi",
-            "mrj": "maryjski zachodni",
-            "ms": "malajski",
-            "mt": "maltański",
-            "mus": "krik",
-            "mwl": "mirandyjski",
-            "my": "birmański",
-            "myv": "erzja",
-            "mzn": "mazanderański",
-            "na": "nauruański",
-            "nah": "nahuatl",
-            "nap": "neapolitański",
-            "nds": "dolnoniemiecki",
-            "nds_nl": "dolnoniemiecki (Holandia)",
-            "ne": "nepalski",
-            "new": "newarski",
-            "ng": "ndonga",
-            "nl": "holenderski",
-            "nn": "norweski (nynorsk)",
-            "no": "norweski (bokmål)",
-            "nov": "novial",
-            "nrm": "normandzki",
-            "nso": "północny sotho",
-            "nv": "nawaho",
-            "ny": "cziczewa",
-            "oc": "prowansalski",
-            "om": "oromo",
-            "or": "orija",
-            "os": "osetyjski",
-            "pa": "pendżabski",
-            "pag": "pangasinan",
-            "pam": "pampango",
-            "pap": "papiamento",
-            "pcd": "pikardyjski",
-            "pdc": "pensylwański",
-            "pfl": "palatynacki",
-            "pi": "pali",
-            "pih": "norfolk",
-            "pl": "polski",
-            "pms": "piemoncki",
-            "pnb": "zachodniopendżabski",
-            "pnt": "pontyjski",
-            "ps": "paszto",
-            "pt": "portugalski",
-            "qu": "keczua",
-            "rm": "retoromański",
-            "rmy": "romski",
-            "rn": "rundi",
-            "ro": "rumuński",
-            "roa_rup": "arumuński",
-            "roa_tara": "tarencki",
-            "ru": "rosyjski",
-            "rue": "rusiński",
-            "rw": "ruanda",
-            "sa": "sanskryt",
-            "sah": "jakucki",
-            "sc": "sardyński",
-            "scn": "sycylijski",
-            "sco": "szkocki",
-            "sd": "sindhi",
-            "se": "północnosaamski",
-            "sg": "sango",
-            "sh": "serbsko-chorwacki",
-            "si": "syngaleski",
-            "simple": "Simple English",
-            "sk": "słowacki",
-            "sl": "słoweński",
-            "sm": "samoański",
-            "sn": "shona",
-            "so": "somalijski",
-            "sq": "albański",
-            "sr": "serbski",
-            "srn": "sranan tongo",
-            "ss": "suazi",
-            "st": "sotho",
-            "stq": "fryzyjski saterlandzki",
-            "su": "sundajski",
-            "sv": "szwedzki",
-            "sw": "suahili",
-            "szl": "śląski",
-            "ta": "tamilski",
-            "te": "telugu",
-            "tet": "tetum",
-            "tg": "tadżycki",
-            "th": "tajski",
-            "ti": "tigrinia",
-            "tk": "turkmeński",
-            "tl": "tagalski",
-            "tn": "tswana",
-            "to": "tonga",
-            "tpi": "tok pisin",
-            "tr": "turecki",
-            "ts": "tsonga",
-            "tt": "tatarski",
-            "tum": "tumbuka",
-            "tw": "twi",
-            "ty": "tahitański",
-            "tyv": "tuwiński",
-            "udm": "udmurcki",
-            "ug": "ujgurski",
-            "uk": "ukraiński",
-            "ur": "urdu",
-            "uz": "uzbecki",
-            "ve": "venda",
-            "vec": "wenecki",
-            "vep": "wepski",
-            "vi": "wietnamski",
-            "vls": "zachodnioflamandzki",
-            "vo": "volapük",
-            "wa": "waloński",
-            "war": "warajski",
-            "wo": "wolof",
-            "wuu": "wu",
-            "xal": "kałmucki",
-            "xh": "xhosa",
-            "xmf": "megrelski",
-            "yi": "jidysz",
-            "yo": "joruba",
-            "za": "zhuang",
-            "zea": "zelandzki",
-            "zh": "chiński standardowy",
-            "zh_classical": "chiński klasyczny",
-            "zh_min_nan": "minnan",
-            "zh_yue": "kantoński",
-            "zu": "zulu"
-        };
+        var langs = {};
         /**
          * Zwraca polską nazwę języka dla podanego kodu
          * @param code Kod języka
@@ -357,6 +61,63 @@ var Msz2001;
             return code;
         }
         InterwikiLanglist.GetLanguageName = GetLanguageName;
+        /**
+         * Pobiera listę języków z serwera lub z pamięci podręcznej
+         */
+        function LoadLanguageNames() {
+            // 7 dni * 24 godzin * 60 minut * 60 sekund * 1000 ms = 604 800 000
+            var CACHE_TIME = 604800000;
+            // Spróbuj odczytać języki z pamięci podręcznej
+            try {
+                var storage = window.localStorage;
+                if (storage) {
+                    var fetchDate = storage.getItem('InterwikiLanglist.languages.fetchDate');
+                    if (fetchDate) {
+                        var now = Date.now();
+                        if (now - parseInt(fetchDate) <= CACHE_TIME) {
+                            var data = storage.getItem('InterwikiLanglist.languages.list');
+                            if (data) {
+                                langs = JSON.parse(data);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (e) {
+                console.warn('[InterwikiLanglist] Error parsing storage data', e);
+            }
+            var xhr = new XMLHttpRequest();
+            xhr.addEventListener('load', function () {
+                try {
+                    var data = JSON.parse(xhr.responseText);
+                    var lang_info = data.query.languageinfo;
+                    var languages = {};
+                    for (var lang_code in lang_info) {
+                        // Wikidane używają formatu z _, a API tu zwraca z myślnikiem
+                        languages[lang_code.replaceAll('-', '_')] = lang_info[lang_code].name;
+                    }
+                    // Zapisz dane do pamięci podręcznej
+                    try {
+                        var storage = window.localStorage;
+                        if (storage) {
+                            storage.setItem('InterwikiLanglist.languages.fetchDate', Date.now().toString());
+                            storage.setItem('InterwikiLanglist.languages.list', JSON.stringify(languages));
+                        }
+                    }
+                    catch (e) {
+                        console.warn('[InterwikiLanglist] Error saving storage data', e);
+                    }
+                    langs = languages;
+                }
+                catch (e) {
+                    console.warn('[InterwikiLanglist] Error loading languages from the server', e);
+                }
+            });
+            xhr.open('GET', 'https://pl.wikipedia.org/w/api.php?action=query&format=json&meta=languageinfo&formatversion=2&liprop=name', true);
+            xhr.send();
+        }
+        InterwikiLanglist.LoadLanguageNames = LoadLanguageNames;
     })(InterwikiLanglist = Msz2001.InterwikiLanglist || (Msz2001.InterwikiLanglist = {}));
 })(Msz2001 || (Msz2001 = {}));
 var Msz2001;
@@ -1105,6 +866,7 @@ var Msz2001;
         $(function () {
             var e_10, _a;
             var _b;
+            InterwikiLanglist.LoadLanguageNames();
             // Wyszukaj interwiki wstawione za pomocą {link-interwiki}
             var iw_link_wrappers = document.querySelectorAll('.link-interwiki');
             var langlist = new InterwikiLanglist.LangList();
