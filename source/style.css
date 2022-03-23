@@ -1,4 +1,4 @@
-.link-interwiki a {text-decoration:none; font-size:0.8em; cursor:default;}
+.link-interwiki a {text-decoration:none; cursor:default;}
 
 .interwiki-langlist-wrapper {
     background:#fff; border:1px solid #bbb; position:fixed; border-radius:4px;
@@ -25,6 +25,8 @@
     margin:0; padding:0 4px; list-style:none; max-height:16em; overflow-y:auto;
 }
 .interwiki-langlist-wrapper li::before {content: '• ';}
+.interwiki-langlist-wrapper li.suggested {font-weight:700;}
+.interwiki-langlist-wrapper li.hidden {display:none;}
 
 .interwiki-langlist-wrapper li.badge-anm::after,
 .interwiki-langlist-wrapper li.badge-lnm::after,
@@ -42,6 +44,7 @@
     font-size:0.85em; border-top:1px solid #ddd; margin-top:4px; padding-top:4px;
     text-align:right;
 }
+.interwiki-langlist-wrapper footer.hidden {display:none;}
 
 .interwiki-langlist-backdrop {
     position:fixed; z-index:9; background:rgba(0,0,0,0.2);
