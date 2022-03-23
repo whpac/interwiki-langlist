@@ -134,7 +134,7 @@ namespace Msz2001.InterwikiLanglist {
                 }
                 if(sitelink.IsMain) {
                     badge_title += ' (sugerowany przez autora)';
-                    li.style.fontWeight = 'bold';
+                    li.classList.add('suggested');
                 }
 
                 li.title = sitelink.Title + badge_title;

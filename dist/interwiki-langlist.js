@@ -417,7 +417,7 @@ var Msz2001;
                         }
                         if (sitelink.IsMain) {
                             badge_title += ' (sugerowany przez autora)';
-                            li.style.fontWeight = 'bold';
+                            li.classList.add('suggested');
                         }
                         li.title = sitelink.Title + badge_title;
                         this.LanguagesList.appendChild(li);
