@@ -741,18 +741,6 @@ $(function () {
      * @returns {MarkedSitelink[]}
      */
     function filterSitelinks(sitelinks, suggested_site) {
-        //@ts-ignore
-        var uls = mw.uls;
-        // Add ULS recommended languages to the list specified at top
-        if(uls && uls.getFrequentLanguageList) {
-            var uls_recommendations = uls.getFrequentLanguageList();
-            uls_recommendations.forEach(function (lang) {
-                lang += 'wiki';
-                if(RECOMMENDED_SITES.includes(lang)) return;
-                RECOMMENDED_SITES.push(lang);
-            });
-        }
-
         /** @type {MarkedSitelink[]} */
         var marked_sitelinks = [];
         sitelinks.forEach(function (sitelink) {
@@ -765,11 +753,35 @@ $(function () {
         return marked_sitelinks;
     }
 
+    /**
+     * Retrieves a list of recommended languages from the ULS and appends them to the RECOMMENDED_SITES.
+     * Furthermore, appends the UI language too
+     */
+    function addUlsToRecommendedLangs(){
+        var addLanguage = function (lang) {
+            lang += 'wiki';
+            if(RECOMMENDED_SITES.includes(lang)) return;
+            RECOMMENDED_SITES.push(lang);
+        };
+
+        //@ts-ignore
+        var uls = mw.uls;
+        // Add ULS recommended languages to the list specified at the top of gadget
+        if(uls && uls.getFrequentLanguageList) {
+            var uls_recommendations = uls.getFrequentLanguageList();
+            uls_recommendations.forEach(addLanguage);
+        }
+
+        var userLang = mw.config.get('wgUserLanguage');
+        addLanguage(userLang);
+    }
+
 
     //! Initialize the gadget
     mw.loader.using('mediawiki.storage', loadLanguageNames);
     var view = createLanguagesView();
     normalizeLanguageLinks();
+    addUlsToRecommendedLangs();
     if(addHandlersToLanguageLinks(view) > 0) {
         addPanelHideHandlers(view);
     }
