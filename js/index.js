@@ -118,6 +118,7 @@ $(function () {
             $panel: $panel,     // The panel wrapper
             $visibleLinksCache: null,   // jQuery object with visible links
             currentArticleId: null,     // The id of an article whose sitelinks are displayed
+            isPopulated: false,         // Whether the links have already been displayed
             openedWithClick: false,     // Whether the panel was opened by clicking on the icon or hovering it with the mouse
 
             /**
@@ -144,6 +145,10 @@ $(function () {
              * @param {MarkedSitelink[]} links An array of links to display
              */
             displayLinks: function (links) {
+                // Don't add links twice
+                if(view.isPopulated) return;
+                view.isPopulated = true;
+
                 if(links.length == 0) {
                     view.displayMessage(MSG.articleNoLanguages);
                     view.updateLinksCache(function () {
@@ -316,6 +321,7 @@ $(function () {
                 view.$anchor = null;
                 view.$visibleLinksCache = null;
                 view.currentArticleId = null;
+                view.isPopulated = false;
                 view.openedWithClick = false;
             },
 
@@ -775,6 +781,7 @@ $(function () {
  *      $panel: JQuery<HTMLElement>,
  *      $visibleLinksCache: JQuery<HTMLElement> | null,
  *      currentArticleId: ArticleId | null,
+ *      isPopulated: boolean,
  *      openedWithClick: boolean,
  *      setQId: (qId: string | null) => void,
  *      setCreateArticleUrl: (url: string) => void,
