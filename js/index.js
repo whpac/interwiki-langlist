@@ -117,6 +117,7 @@ $(function () {
             $anchor: null,  // The language icon
             $panel: $panel,     // The panel wrapper
             $visibleLinksCache: null,   // jQuery object with visible links
+            currentArticleId: null,     // The id of an article whose sitelinks are displayed
             openedWithClick: false,     // Whether the panel was opened by clicking on the icon or hovering it with the mouse
 
             /**
@@ -313,18 +314,21 @@ $(function () {
                 $footer.addClass('hidden');
                 view.displayMessage(MSG.loading);
                 view.$anchor = null;
-                view.openedWithClick = false;
                 view.$visibleLinksCache = null;
+                view.currentArticleId = null;
+                view.openedWithClick = false;
             },
 
             /**
              * Displays the view and positions it accordingly
              * @param {JQuery<HTMLElement>} $anchor The language icon
+             * @param {ArticleId} articleId The id of article whose sitelinks to show
              */
-            show: function ($anchor) {
+            show: function ($anchor, articleId) {
                 if(view.$anchor == $anchor) return;
 
                 view.$anchor = $anchor;
+                view.currentArticleId = articleId;
                 $panel.addClass('shown');
                 view.refreshPosition();
             },
@@ -457,9 +461,9 @@ $(function () {
             var display = function () {
                 if(view.isVisible()) return false;
 
-                loadLanguageLinksIntoView(articleId, view);
+                view.show($link, articleId);
                 view.setCreateArticleUrl($redLink.attr('href'));
-                view.show($link);
+                loadLanguageLinksIntoView(articleId, view);
                 return true;
             };
 
@@ -554,6 +558,10 @@ $(function () {
      */
     function loadLanguageLinksIntoView(articleId, view) {
         fetchSitelinks(articleId).then(function (data) {
+            // Check if the panel is still on the desired icon
+            if(view.currentArticleId.site != articleId.site) return;
+            if(view.currentArticleId.title != articleId.title) return;
+
             view.setQId(data.qId);
             sortSitelinks(data.sitelinks);
             var filteredLinks = filterSitelinks(data.sitelinks, articleId.site);
@@ -564,7 +572,7 @@ $(function () {
     }
 
     /**
-     * 
+     * Downloads the sitelinks for a given article
      * @param {ArticleId} articleId The article
      * @returns {JQuery.Promise<{qId: string, sitelinks: ArticleId[]}>}
      */
@@ -766,6 +774,7 @@ $(function () {
  *      $anchor: JQuery<HTMLElement> | null,
  *      $panel: JQuery<HTMLElement>,
  *      $visibleLinksCache: JQuery<HTMLElement> | null,
+ *      currentArticleId: ArticleId | null,
  *      openedWithClick: boolean,
  *      setQId: (qId: string | null) => void,
  *      setCreateArticleUrl: (url: string) => void,
@@ -776,7 +785,7 @@ $(function () {
  *      getBoundary: () => DOMRect,
  *      isInPanel: (element: HTMLElement) => boolean,
  *      hide: () => void,
- *      show: ($anchor: JQuery<HTMLElement>) => void,
+ *      show: ($anchor: JQuery<HTMLElement>, articleId: ArticleId) => void,
  *      isVisible: () => boolean
  * }} LangListView
  *
