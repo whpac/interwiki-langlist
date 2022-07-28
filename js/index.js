@@ -32,6 +32,7 @@ $(function () {
     var BADGES = {
         // A special badge that represents no badges
         none: {
+            tooltip: '$1',
             priority: 0
         },
         Q17437798: {
@@ -171,7 +172,7 @@ $(function () {
                     if(link.article.badges.length > 0) {
                         var badge = BADGES[link.article.badges[0]] || BADGES.none;
                         tooltip = mw.format(badge.tooltip, link.article.title);
-                        $li.addClass(badge.className);
+                        if(badge.className) $li.addClass(badge.className);
                     }
 
                     // The author may have specified a link to a foreign Wikipedia and not to Wikidata
