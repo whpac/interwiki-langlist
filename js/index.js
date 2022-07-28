@@ -17,7 +17,7 @@ $(function () {
         articleNoLanguages: 'Ten artykuł nie istnieje jeszcze w żadnym języku',
         loading: 'Wczytywanie...',
         languagesLoadingError: 'Nie udało się wczytać listy języków',
-        suggestedByAuthor: ' (sugerowany przez autora)',
+        suggestedByAuthor: '$1 (sugerowany przez autora)',
         showMore: 'pokaż więcej',
         hiddenCount: function (n) {
             if(n == 1) return ' (1 ukryty)';
@@ -35,17 +35,17 @@ $(function () {
             priority: 0
         },
         Q17437798: {
-            tooltip: ' – Dobry Artykuł',
+            tooltip: '$1 – Dobry Artykuł',
             className: 'badge-da',
             priority: 1
         },
         Q17506997: {
-            tooltip: ' – Lista na Medal',
+            tooltip: '$1 – Lista na Medal',
             className: 'badge-lnm',
             priority: 2
         },
         Q17437796: {
-            tooltip: ' – Artykuł na Medal',
+            tooltip: '$1 – Artykuł na Medal',
             className: 'badge-anm',
             priority: 3
         }
@@ -54,7 +54,7 @@ $(function () {
 
     //! Define some other constants
     /** Some major Wikipedias that are never going to be hidden if there are many links */
-    var RECOMMENDED_SITES = ['enwiki', 'dewiki', 'frwiki', 'ruwiki', 'eswiki'];
+    var RECOMMENDED_SITES = ['enwiki', 'dewiki', 'frwiki', 'ruwiki', 'eswiki', 'itwiki'];
     /** Wikidata's wiki id */
     var WIKIDATA_ID = 'wikidatawiki';
     /** Key of the languages list in the localStorage */
@@ -170,17 +170,17 @@ $(function () {
                     var tooltip = link.article.title;
                     if(link.article.badges.length > 0) {
                         var badge = BADGES[link.article.badges[0]] || BADGES.none;
-                        tooltip += badge.tooltip;
+                        tooltip = mw.format(badge.tooltip, link.article.title);
                         $li.addClass(badge.className);
                     }
 
                     // The author may have specified a link to a foreign Wikipedia and not to Wikidata
                     if(link.authorSuggested) {
                         $li.addClass('suggested');
-                        tooltip += MSG.suggestedByAuthor;
+                        tooltip = mw.format(MSG.suggestedByAuthor, tooltip);
                     }
 
-                    $li.attr('title', tooltip);
+                    $a.attr('title', tooltip);
                     $li.append($a);
                     $languagesList.append($li);
 
@@ -757,7 +757,7 @@ $(function () {
      * Retrieves a list of recommended languages from the ULS and appends them to the RECOMMENDED_SITES.
      * Furthermore, appends the UI language too
      */
-    function addUlsToRecommendedLangs(){
+    function addUlsToRecommendedLangs() {
         var addLanguage = function (lang) {
             lang += 'wiki';
             if(RECOMMENDED_SITES.includes(lang)) return;
