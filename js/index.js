@@ -1,6 +1,6 @@
 //@ts-check
 /**
- * A gadget that extends functionality of [[Template:Link-interwiki].
+ * A gadget that extends functionality of [[w:pl:Template:Link-interwiki].
  * It allows user to browse a list of language versions where
  * the linked article already exists.
  * 
@@ -434,12 +434,15 @@ $(function () {
             }
         }
 
+        // Capitalize the first letter of the title
+        title = title.charAt(0).toUpperCase() + title.substring(1);
+
         return {
             site: site,
             title: title,
             badges: []
         };
-    };
+    }
 
     /**
      * Attaches mouse hover and click handler to each link.
@@ -574,6 +577,7 @@ $(function () {
             var filteredLinks = filterSitelinks(data.sitelinks, articleId.site);
             view.displayLinks(filteredLinks);
         }).fail(function (e) {
+            console.error('[InterwikiLanglist] Error fetching foreign articles', e);
             view.displayMessage(MSG.languagesLoadingError);
         });
     }
@@ -588,8 +592,8 @@ $(function () {
         var deferred = $.Deferred();
 
         // Escape some more characters (they are unsafe for URLs)
-        var title = articleId.title.replace('&', '%26');
-        title = title.replace('=', '%3D');
+        var title = articleId.title.replace(/&/g, '%26');
+        title = title.replace(/=/g, '%3D');
 
         // Prepare a selector depending on the wiki
         // For Wikidata it's sufficient to query the ids parameter
@@ -617,10 +621,11 @@ $(function () {
                     if(!qId.startsWith('Q')) qId = null;
 
                     /** @type {ArticleId[]} */
-                    var sitelinks = Object.values(entity[1].sitelinks) || [];
+                    var sitelinks = Object.values(entity[1].sitelinks || {}) || [];
                     if(sitelinks.length == 0 && articleId.site != WIKIDATA_ID) {
                         // The article is not connected to Wikidata,
                         // so use the original article id as a link
+                        articleId.title = articleId.title.replace(/_/g, ' ');
                         sitelinks = [articleId];
                     }
 
