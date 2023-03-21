@@ -491,9 +491,8 @@ $(function () {
                     display();
                 });
             } else {
-                // On Minerva there is a popup after clicking on a red link.
-                // This gadget overrides it, so attach a new event listener
-                $redLink.off('click');
+                // On Minerva, attach the click handler to the red link
+                // so that the panel is easier to invoke
                 $redLink.on('click', function (e) {
                     if(!display()) return;
 
@@ -558,6 +557,36 @@ $(function () {
 
         // Window resize will probably cause content reflow
         window.addEventListener('resize', view.refreshPosition);
+    }
+
+    /**
+     * Listens for a mobile "This article not exists" drawer
+     * and hides it immediately after it appears if the
+     * language links are shown.
+     * @param {LangListView} view The language list view
+     */
+    function addMobileDrawerObserver(view){
+        /** @type {MutationCallback} */
+        var callback = function(mutationList, observer) {
+            mutationList.forEach(function(mutation) {
+                // Don't interfere with drawers for other purposes
+                if (!view.isVisible()) return;
+                if (mutation.type !== 'childList') return;
+
+                mutation.addedNodes.forEach(function(node){
+                    //@ts-ignore
+                    if(node.classList && node.classList.contains('drawer-container')) {
+                        // Remove the drawer as it is not needed
+                        node.remove();
+                    }
+                });
+            });
+        };
+
+        // Observe for body children changes
+        // We're interested only in direct children being added to body
+        const observer = new MutationObserver(callback);
+        observer.observe(document.body, { childList: true });
     }
 
     //! Wikidata client
@@ -790,6 +819,12 @@ $(function () {
     addUlsToRecommendedLangs();
     if(addHandlersToLanguageLinks(view) > 0) {
         addPanelHideHandlers(view);
+
+        // On Minerva there is a popup after clicking on a red link.
+        // This gadget overrides it, so attach a new event listener
+        if(mw.config.get('skin') === 'minerva') {
+            addMobileDrawerObserver(view);
+        }
     }
 });
 /**
