@@ -418,6 +418,10 @@ $(function () {
         var titlePos = titlePrefixPos + titlePrefix.length;
         var title = url.substring(titlePos);
 
+        if(title.indexOf('#') !== -1) {
+            title = title.substring(0, title.indexOf('#'));
+        }
+
         // No need to extract the language if site is Wikidata
         var site = WIKIDATA_ID;
         if(url.indexOf('wikidata.org') < 0) {
