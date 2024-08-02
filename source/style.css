@@ -1,98 +1,146 @@
-.link-interwiki a {text-decoration:none; cursor:default;}
+.link-interwiki a {
+    text-decoration: none;
+    cursor: default;
+}
 
 .interwiki-langlist-wrapper {
-    background:#fff; border:1px solid #bbb; position:fixed; border-radius:4px;
-    box-shadow:1px 2px 6px 2px rgba(0, 0, 0, 0.2); font-size:0.9em; padding:4px;
-    z-index:10; display:none; min-width:150px;
+    background: var(--background-color-base, #fff);
+    border: 1px solid var(--border-color-base, #a2a9b1);
+    position: fixed;
+    border-radius: 4px;
+    box-shadow: 1px 2px 6px 2px rgba(0, 0, 0, 0.2);
+    font-size: 0.9em;
+    padding: 4px;
+    z-index: 10;
+    display: none;
+    min-width: 150px;
 }
-.interwiki-langlist-wrapper.shown {display:block;}
+.interwiki-langlist-wrapper.shown {display: block;}
 
 .interwiki-langlist-wrapper .create-wrapper {
-    text-align:center; font-size:0.85em; padding:4px; margin-bottom:16px;
-    display:none;
-}
-
-.interwiki-langlist-wrapper .create-wrapper .mw-ui-button {
-    display:block; margin:16px auto 0 auto; width:fit-content;
+    text-align: center;
+    font-size: 0.85em;
+    padding: 4px;
+    margin-bottom: 16px;
+    display: none;
 }
 
 .interwiki-langlist-wrapper header {
-    font-weight:700; text-align:center; margin-bottom:4px;
-    border-bottom:1px solid #ddd;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--border-color-subtle, #c8ccd1);
 }
 
 .interwiki-langlist-wrapper ul {
-    margin:0; padding:0 4px; list-style:none; max-height:16em; overflow-y:auto;
+    margin: 0;
+    padding: 0 4px;
+    list-style: none;
+    max-height: 16em;
+    overflow-y: auto;
 }
 .interwiki-langlist-wrapper li::before {content: '• ';}
-.interwiki-langlist-wrapper li.suggested {font-weight:700;}
-.interwiki-langlist-wrapper li.hidden {display:none;}
+.interwiki-langlist-wrapper li.suggested {font-weight: 700;}
+.interwiki-langlist-wrapper li.hidden {display: none;}
 
 .interwiki-langlist-wrapper li.badge-anm::after,
 .interwiki-langlist-wrapper li.badge-lnm::after,
 .interwiki-langlist-wrapper li.badge-da::after {
-    content:' '; display:inline-block; font-size:0; border:4px solid gold;
-    box-sizing:border-box; width:12px; height:12px; border-radius:50%; margin-left:8px;
+    content: ' ';
+    display: inline-block;
+    font-size: 0;
+    border: 4px solid gold;
+    box-sizing: border-box;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-left: 8px;
 }
-.interwiki-langlist-wrapper li.badge-da::after {border-color:silver;}
+.interwiki-langlist-wrapper li.badge-da::after {border-color: silver;}
 
 .interwiki-langlist-wrapper .notice {
-    color:#666; text-align:center; font-style:italic; font-size:0.85em; padding:4px;
+    color: var(--color-subtle, #54595d);
+    text-align: center;
+    font-style: italic;
+    font-size: 0.85em;
+    padding: 4px;
 }
 
 .interwiki-langlist-wrapper footer {
-    font-size:0.85em; border-top:1px solid #ddd; margin-top:4px; padding-top:4px;
-    text-align:right;
+    font-size: 0.85em;
+    border-top: 1px solid var(--border-color-subtle, #c8ccd1);
+    margin-top: 4px;
+    padding-top: 4px;
+    text-align: right;
 }
-.interwiki-langlist-wrapper footer.hidden {display:none;}
+.interwiki-langlist-wrapper footer.hidden {display: none;}
 
 .interwiki-langlist-backdrop {
-    position:fixed; z-index:9; background:rgba(0,0,0,0.2);
-    display:none; width:100vw; height:100vh; top:0; left:0;
+    position: fixed;
+    z-index: 9;
+    background: rgba(0,0,0,0.2);
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
 }
+
+/* Wycofuje anulowanie rozmiaru grafiki w infoboksie, [[Specjalna:Diff/73043738]] */
+.mw-parser-output .infobox .link-interwiki img {width: 12px;}
 
 
 /* Dostosowanie do skórki na urządzenia mobilne - panel u dołu ekranu */
 body.skin-minerva .interwiki-langlist-wrapper {
-    border-width:1px 0 0 0; border-radius:0;
-    bottom:0; left:0 !important; top:unset !important; width:100%; box-sizing:border-box;
-    padding:16px; font-size:1rem;
-    box-shadow:0px -4px 6px 2px rgba(0, 0, 0, 0.2);
+    border-width: 1px 0 0 0;
+    border-radius: 0;
+    bottom: 0;
+    left: 0 !important;
+    top: unset !important;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 16px;
+    font-size: 1rem;
+    box-shadow: 0px -4px 6px 2px rgba(0, 0, 0, 0.2);
 }
 
-body.skin-minerva .interwiki-langlist-wrapper .create-wrapper {display:block;}
+body.skin-minerva .interwiki-langlist-wrapper .create-wrapper {display: block;}
 
 body.skin-minerva .interwiki-langlist-wrapper header {
-    border-bottom:none; margin-bottom:16px;
+    border-bottom: none;
+    margin-bottom: 16px;
 }
 
 body.skin-minerva .interwiki-langlist-wrapper footer {
-    border-top:none; margin-top:16px;
+    border-top: none;
+    margin-top: 16px;
 }
 
 body.skin-minerva .interwiki-langlist-wrapper ul {
-    line-height:1.8; max-height:max(40vh, 15em); list-style-image:none;
+    line-height: 1.8;
+    max-height: max(40vh, 15em);
+    list-style-image: none;
 }
 
 /* Na mobilnej pokazuje tło pod listą języków */
 body.skin-minerva .interwiki-langlist-wrapper.shown + .interwiki-langlist-backdrop {
-    display:block;
+    display: block;
 }
 
-body.skin-minerva .link-interwiki a {cursor:pointer;}
+body.skin-minerva .link-interwiki a {cursor: pointer;}
 
-@media only screen and (min-width:432px){
-    body.skin-minerva .interwiki-langlist-wrapper {padding:16px calc(50vw - 200px);}
+@media only screen and (min-width: 432px){
+    body.skin-minerva .interwiki-langlist-wrapper {padding: 16px calc(50vw - 200px);}
 }
 
 
 /* Ciemna skórka - to co jest poniżej może trafić do kodu Ciemnego Wektora */
-html.enable-dark-skin .interwiki-langlist-wrapper {background:#222; border-color:#777;}
-html.enable-dark-skin .interwiki-langlist-wrapper header {border-bottom-color:#666;}
-html.enable-dark-skin .interwiki-langlist-wrapper footer {border-top-color:#666;}
-html.enable-dark-skin .interwiki-langlist-wrapper .notice {color:#999;}
+html.enable-dark-skin .interwiki-langlist-wrapper {background: #222; border-color: #777;}
+html.enable-dark-skin .interwiki-langlist-wrapper header {border-bottom-color: #666;}
+html.enable-dark-skin .interwiki-langlist-wrapper footer {border-top-color: #666;}
+html.enable-dark-skin .interwiki-langlist-wrapper .notice {color: #999;}
 html.enable-dark-skin .interwiki-langlist-wrapper li.badge-anm::after,
-html.enable-dark-skin .interwiki-langlist-wrapper li.badge-lnm::after {border-color:#e4c000;}
-html.enable-dark-skin .interwiki-langlist-wrapper li.badge-da::after {border-color:#888;}
-html.enable-dark-skin .link-interwiki img {filter:invert(1) hue-rotate(180deg);}
-html.enable-dark-skin .interwiki-langlist-backdrop {background:rgba(0,0,0,0.7);}
+html.enable-dark-skin .interwiki-langlist-wrapper li.badge-lnm::after {border-color: #e4c000;}
+html.enable-dark-skin .interwiki-langlist-wrapper li.badge-da::after {border-color: #888;}
+html.enable-dark-skin .link-interwiki img {filter: invert(1) hue-rotate(180deg);}
+html.enable-dark-skin .interwiki-langlist-backdrop {background: rgba(0,0,0,0.7);}

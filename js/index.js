@@ -83,11 +83,12 @@ $(function () {
         var $panel = $('<div class="interwiki-langlist-wrapper">');
         $('body').append($panel, $backdrop);
 
-        // Invitation to create article (mimick Minerva's default behavior)
-        var $createArticleButton = $('<a class="mw-ui-button mw-ui-progressive">')
+        // Invitation to create article (mimick Minerva's default behavior); Minerva loads codex-search-styles by default
+        var $createArticleButton = $('<a class="cdx-button cdx-button--action-progressive">')
             .text(MSG.createArticle);
         var $createArticleWrapper = $('<div class="create-wrapper">')
             .text(MSG.articleDoesntExist)
+            .append($('<br/>'))
             .append($createArticleButton);
         $panel.append($createArticleWrapper);
 
@@ -467,7 +468,7 @@ $(function () {
             // Change the interwiki link into a language icon
             $link.attr('href', 'javascript:void(0)');
             $link.attr('title', MSG.iconTitle);
-            $link.html('<img src="https://upload.wikimedia.org/wikipedia/commons/4/45/Translate_link_color_crop.svg" alt="' + MSG.iconAlt + '" width="12" />');
+            $link.html('<img class="skin-invert" src="https://upload.wikimedia.org/wikipedia/commons/4/45/Translate_link_color_crop.svg" alt="' + MSG.iconAlt + '" width="12" />');
 
             var $redLink = $link.parent().prev();
 
@@ -696,6 +697,7 @@ $(function () {
      */
     function buildLink(articleId) {
         var langCode = articleId.site.replace('wiki', '');
+        langCode = langCode.replace(/_/g, '-'); // Wikidata uses underscores, but in URLs there are hyphens
         var title = encodeURI(articleId.title.replace(/ /g, '_'));
         return 'https://' + langCode + '.wikipedia.org/wiki/' + title;
     }
